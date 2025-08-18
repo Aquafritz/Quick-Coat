@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import 'package:quickcoat/features/landing/home/landing_page.dart';
-import 'package:quickcoat/screen/Admin/AdminHome.dart';
+import 'package:quickcoat/screen/Admin/AdminLayout.dart'; // <-- new
 import 'package:quickcoat/screen/Costumer/CostumerHome.dart';
 import 'package:quickcoat/screen/Drivers/DriverHome.dart';
 import 'package:quickcoat/screen/auth/forgotPassword.dart';
@@ -20,22 +20,35 @@ class AppRoutes {
   static const String termsandcondition = '/terms&condition';
   static const String aboutus = '/aboutUs';
   static const String privacypolicy = '/privacyPolicy';
-  static const String adminHome = '/adminHome';
+  
+
+  // Admin Layout
+  static const String adminDashboard = '/adminDashboard';
+  static const String adminProducts = '/adminProducts';
+  static const String adminOrders = '/adminOrders';
+  static const String adminAnalytics = '/adminAnalytics';
+  static const String adminSettings = '/adminSettings';
+
   static const String costumerHome = '/costumerHome';
   static const String driverHome = '/driverHome';
 
-
   static final routes = [
-    GetPage(name: '/', page: () => LandingPage()),
-    GetPage(name: '/contact', page: () => ContactPage()),
-    GetPage(name: '/signIn', page: () => SignIn()),
-    GetPage(name: '/signUp', page: () => SignUp()),
-    GetPage(name: '/forgotPassword', page: () => ForgotPassword()),
-    GetPage(name: '/terms&condition', page: () => TermsandCondition()),
-    GetPage(name: '/aboutUs', page: () => AboutUs()),
-    GetPage(name: '/privacyPolicy', page: () => PrivacyPolicy()),
-    GetPage(name: '/adminHome', page: () => AdminHome()),
-    GetPage(name: '/costumerHome', page: () => CostumerHome()),
-    GetPage(name: '/driverHome', page: () => DriverHome()),
+    GetPage(name: landpage, page: () => LandingPage()),
+    GetPage(name: signIn, page: () => SignIn()),
+    GetPage(name: signUp, page: () => SignUp()),
+    GetPage(name: forgotpassword, page: () => ForgotPassword()),
+    GetPage(name: termsandcondition, page: () => TermsandCondition()),
+    GetPage(name: aboutus, page: () => AboutUs()),
+    GetPage(name: privacypolicy, page: () => PrivacyPolicy()),
+    GetPage(name: contact, page: () => ContactPage()),
+    GetPage(name: costumerHome, page: () => CostumerHome()),
+    GetPage(name: driverHome, page: () => DriverHome()),
+
+    // ✅ All admin routes use same layout
+    GetPage(name: adminDashboard, page: () => const AdminLayout()),
+    GetPage(name: adminProducts, page: () => const AdminLayout()),
+    GetPage(name: adminOrders, page: () => const AdminLayout()),
+    GetPage(name: adminAnalytics, page: () => const AdminLayout()),
+    GetPage(name: adminSettings, page: () => const AdminLayout()),
   ];
 }
