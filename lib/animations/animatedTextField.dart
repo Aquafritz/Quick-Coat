@@ -11,9 +11,9 @@ class AnimatedTextField extends StatefulWidget {
   final Widget? prefix;
   final bool readOnly;
   final List<TextInputFormatter>? inputFormatters;
-  final FocusNode? focusNode; // Add focusNode property
-  final VoidCallback? onEditingComplete; // Add onEditingComplete property
-  final TextInputAction? textInputAction; // Add textInputAction property
+  final FocusNode? focusNode;
+  final VoidCallback? onEditingComplete;
+  final TextInputAction? textInputAction;
 
   const AnimatedTextField({
     super.key,

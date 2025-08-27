@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      initialRoute: AppRoutes.landpage,
+      initialRoute: AppRoutes.adminHome,
       getPages: AppRoutes.routes,
       defaultTransition: Transition.fadeIn,
       transitionDuration: Duration(milliseconds: 300),

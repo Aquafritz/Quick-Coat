@@ -2,6 +2,8 @@ import 'package:get/get.dart';
 import 'package:quickcoat/features/landing/home/landing_page.dart';
 import 'package:quickcoat/screen/Admin/AdminHome.dart';
 import 'package:quickcoat/screen/Costumer/CostumerHome.dart';
+import 'package:quickcoat/screen/Costumer/sections/productsdetails.dart';
+import 'package:quickcoat/screen/Costumer/sections/shoppingcart.dart';
 import 'package:quickcoat/screen/Drivers/DriverHome.dart';
 import 'package:quickcoat/screen/auth/forgotPassword.dart';
 import 'package:quickcoat/screen/auth/signIn.dart';
@@ -23,6 +25,8 @@ class AppRoutes {
   static const String adminHome = '/adminHome';
   static const String costumerHome = '/costumerHome';
   static const String driverHome = '/driverHome';
+  static const String productDetails = '/productDetails';
+  static const String shoppingCart = '/shoppingCart';
 
 
   static final routes = [
@@ -37,5 +41,7 @@ class AppRoutes {
     GetPage(name: '/adminHome', page: () => AdminHome()),
     GetPage(name: '/costumerHome', page: () => CostumerHome()),
     GetPage(name: '/driverHome', page: () => DriverHome()),
+    GetPage(name: '/productDetails', page: () => ProductsDetails()),
+    GetPage(name: '/shoppingCart', page: () => ShoppingCart()),
   ];
 }
