@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quickcoat/core/colors/app_colors.dart';
-import 'package:quickcoat/features/hover_extensions.dart';
-import 'package:quickcoat/features/landing/product_list_view.dart';
+import 'package:quickcoat/animations/hover_extensions.dart';
+import 'package:quickcoat/screen/landing/product_list_view.dart';
 
 class ThirdSection extends StatefulWidget {
   const ThirdSection({super.key});
@@ -29,7 +30,6 @@ class _ThirdSectionState extends State<ThirdSection> {
       ),
       child: Container(
         width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
         margin: EdgeInsets.symmetric(
           vertical: MediaQuery.of(context).size.width / 10,
           horizontal: MediaQuery.of(context).size.width / 40,
@@ -64,6 +64,9 @@ class _ThirdSectionState extends State<ThirdSection> {
                   ),
                 ),
                 GestureDetector(
+                  onTap: () {
+                    Get.toNamed('/signIn');
+                  },
                   child: Row(
                     children: [
                       Text(
@@ -85,7 +88,7 @@ class _ThirdSectionState extends State<ThirdSection> {
                       ),
                     ],
                   ),
-                ).showCursorOnHover,
+                ).showCursorOnHover.moveUpOnHover,
               ],
             ),
             SizedBox(height: MediaQuery.of(context).size.width / 80),

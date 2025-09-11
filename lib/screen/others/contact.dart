@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quickcoat/core/colors/app_colors.dart';
-import 'package:quickcoat/features/hover_extensions.dart';
+import 'package:quickcoat/animations/hover_extensions.dart';
 import 'package:quickcoat/screen/header&footer/footer.dart';
 import 'package:quickcoat/screen/header&footer/header.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quickcoat/core/colors/app_colors.dart';
-import 'package:quickcoat/features/hover_extensions.dart';
+import 'package:quickcoat/animations/hover_extensions.dart';
 
 class Header extends StatelessWidget {
   const Header({super.key});

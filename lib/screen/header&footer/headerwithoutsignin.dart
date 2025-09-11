@@ -2,27 +2,55 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quickcoat/core/colors/app_colors.dart';
-import 'package:quickcoat/features/hover_extensions.dart';
+import 'package:quickcoat/animations/hover_extensions.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HeaderWithout extends StatelessWidget {
   const HeaderWithout({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return const Text("Not signed in");
+    }
+
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection("users")
+          .doc(user.uid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final userData = snapshot.data!.data() as Map<String, dynamic>?;
+
+        final fullName = userData?["full_name"] ?? "Guest User";
+        final email = userData?["email_Address"] ?? user.email ?? "";
+        final profilePic = userData?["profile_picture"];
+
+        return Padding(
           padding: EdgeInsets.symmetric(
             horizontal: MediaQuery.of(context).size.width / 40,
             vertical: MediaQuery.of(context).size.width / 80,
           ),
           child: Row(
             children: [
+              // ✅ Logo
               Image.asset(
                 "assets/images/qclogo.png",
                 fit: BoxFit.cover,
                 height: MediaQuery.of(context).size.width / 30,
                 width: MediaQuery.of(context).size.width / 30,
               ).showCursorOnHover,
+
               SizedBox(width: MediaQuery.of(context).size.width / 90),
+
+              // ✅ QuickCoat Logo Text
               RichText(
                 text: TextSpan(
                   style: TextStyle(
@@ -35,32 +63,30 @@ class HeaderWithout extends StatelessWidget {
                       style: TextStyle(
                         color: AppColors.color11,
                         fontSize: MediaQuery.of(context).size.width / 50,
-                        fontFamily:
-                            GoogleFonts.inter(
-                              fontWeight: FontWeight.bold,
-                            ).fontFamily,
+                        fontFamily: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                        ).fontFamily,
                       ),
                     ),
                     TextSpan(
                       text: "Coat",
                       style: TextStyle(
-                        color: Color(0xFFfff200),
+                        color: const Color(0xFFfff200),
                         fontSize: MediaQuery.of(context).size.width / 50,
-                        fontFamily:
-                            GoogleFonts.inter(
-                              fontWeight: FontWeight.bold,
-                            ).fontFamily,
+                        fontFamily: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                        ).fontFamily,
                       ),
                     ),
                   ],
                 ),
               ).showCursorOnHover,
-              Spacer(),
+
+              const Spacer(),
+
+              // ✅ Search bar
               Row(
                 children: [
-                 
-                  SizedBox(width: MediaQuery.of(context).size.width / 80),
-                  //Search bar
                   Container(
                     width: MediaQuery.of(context).size.width / 6,
                     height: MediaQuery.of(context).size.width / 35,
@@ -69,7 +95,7 @@ class HeaderWithout extends StatelessWidget {
                       borderRadius: BorderRadius.circular(
                         MediaQuery.of(context).size.width / 120,
                       ),
-                      boxShadow: [
+                      boxShadow: const [
                         BoxShadow(
                           color: Colors.black12,
                           blurRadius: 8,
@@ -89,14 +115,14 @@ class HeaderWithout extends StatelessWidget {
                           size: MediaQuery.of(context).size.width / 70,
                         ),
                         SizedBox(
-                          width: MediaQuery.of(context).size.width / 120,
-                        ),
+                            width: MediaQuery.of(context).size.width / 120),
                         Expanded(
                           child: Text(
                             "Search products...",
                             style: TextStyle(
                               color: Colors.grey,
-                              fontSize: MediaQuery.of(context).size.width / 90,
+                              fontSize:
+                                  MediaQuery.of(context).size.width / 90,
                               fontFamily: GoogleFonts.inter().fontFamily,
                             ),
                             overflow: TextOverflow.ellipsis,
@@ -105,8 +131,10 @@ class HeaderWithout extends StatelessWidget {
                       ],
                     ),
                   ).showCursorOnHover,
+
                   SizedBox(width: MediaQuery.of(context).size.width / 80),
-                  //Cart
+
+                  // ✅ Cart Icon
                   GestureDetector(
                     onTap: () {
                       Get.toNamed('/shoppingCart');
@@ -117,73 +145,90 @@ class HeaderWithout extends StatelessWidget {
                       size: MediaQuery.of(context).size.width / 50,
                     ).showCursorOnHover.moveUpOnHover,
                   ),
+
                   SizedBox(width: MediaQuery.of(context).size.width / 80),
-                  //Sign In
-                  GestureDetector(
-                    onTap: () {
 
+                  // ✅ Profile Menu
+                  PopupMenuButton<int>(
+                    offset:
+                        Offset(0, MediaQuery.of(context).size.width / 35),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    onSelected: (value) {
+                      if (value == 0) {
+                        Get.toNamed("/myPurchase");
+                      } else if (value == 1) {
+                        Get.toNamed('/costumerSetting');
+                      } else if (value == 2) {
+                        Get.toNamed('/logout');
+                      }
                     },
-                    child: // Replace the Sign Out Container with this widget
-PopupMenuButton<int>(
-  offset: Offset(0, MediaQuery.of(context).size.width / 35),
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(12),
-  ),
-  onSelected: (value) {
-    if (value == 0) {
-      // Navigate to Profile Settings
-      Get.toNamed("/profile"); // Example route
-    } else if (value == 1) {
-      // Handle Sign Out
-      print("Sign Out Clicked");
-      // Add your logout logic here
-    }
-  },
-  itemBuilder: (context) => [
-    PopupMenuItem(
-      value: 0,
-      child: Row(
-        children: [
-          Icon(Icons.person, color: Colors.black54),
-          SizedBox(width: 8),
-          Text("Profile"),
-        ],
-      ),
-    ),
-    PopupMenuItem(
-      value: 1,
-      child: Row(
-        children: [
-          Icon(Icons.settings, color: Colors.black54),
-          SizedBox(width: 8),
-          Text("Settings"),
-        ],
-      ),
-    ),
-    PopupMenuItem(
-      value: 2,
-      child: Row(
-        children: [
-          Icon(Icons.logout, color: Colors.red),
-          SizedBox(width: 8),
-          Text("Sign Out"),
-        ],
-      ),
-    ),
-  ],
-  child: CircleAvatar(
-    radius: MediaQuery.of(context).size.width / 70,
-    // backgroundImage: AssetImage("assets/images/profile.jpg"), // replace with user image
-    backgroundColor: Colors.green,
-  ).showCursorOnHover.moveUpOnHover,
-),
-
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 0,
+                        child: Row(
+                          children: [
+                            Icon(Icons.person, color: Colors.black54),
+                            SizedBox(width: 8),
+                            Text("My Purchase"),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 1,
+                        child: Row(
+                          children: [
+                            Icon(Icons.settings, color: Colors.black54),
+                            SizedBox(width: 8),
+                            Text("Settings"),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 2,
+                        child: Row(
+                          children: [
+                            Icon(Icons.logout, color: Colors.red),
+                            SizedBox(width: 8),
+                            Text("Sign Out"),
+                          ],
+                        ),
+                      ),
+                    ],
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: MediaQuery.of(context).size.width / 70,
+                          backgroundImage: profilePic != null
+                              ? NetworkImage(profilePic)
+                              : null,
+                          backgroundColor: Colors.grey.shade300,
+                          child: profilePic == null
+                              ? const Icon(Icons.person, color: Colors.white)
+                              : null,
+                        ),
+                         Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(fullName,
+                          style: GoogleFonts.inter(
+                              fontWeight: FontWeight.bold, fontSize: 14)),
+                      Text(email,
+                          style: GoogleFonts.inter(
+                              fontSize: 12, color: Colors.grey)),
+                    ],
                   ),
-                 
+                      ],
+                    ).showCursorOnHover.moveUpOnHover,
+                  ),
+
                 ],
               ),
             ],
           ),
         );
+      },
+    );
   }
 }

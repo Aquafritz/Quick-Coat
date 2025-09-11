@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quickcoat/animations/animatedTextField.dart';
 import 'package:quickcoat/core/colors/app_colors.dart';
-import 'package:quickcoat/features/hover_extensions.dart';
+import 'package:quickcoat/animations/hover_extensions.dart';
 
 class ForgotPassword extends StatefulWidget {
   const ForgotPassword({super.key});

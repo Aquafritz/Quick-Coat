@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quickcoat/animations/animatedTextField.dart';
 import 'package:quickcoat/core/colors/app_colors.dart';
-import 'package:quickcoat/features/hover_extensions.dart';
+import 'package:quickcoat/animations/hover_extensions.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -370,8 +370,9 @@ class _SignUpState extends State<SignUp> {
   }
 
   Future<void> _registerUser(String name, String email, String password) async {
-    try {
-      // Step 1: Check if email already exists in Firestore
+  try {
+    // Step 1: Check if user already exists in Firebase Auth
+     // Step 1: Check if email already exists in Firestore
       QuerySnapshot existingUser =
           await FirebaseFirestore.instance
               .collection('users')
@@ -384,56 +385,45 @@ class _SignUpState extends State<SignUp> {
         return;
       }
 
-      // Step 2: Create user in Firebase Auth
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+    // Step 2: Create user in Firebase Auth
+    UserCredential userCredential =
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
 
-      // Step 3: Get the current max user_id
-      QuerySnapshot userIdSnapshot =
-          await FirebaseFirestore.instance
-              .collection('users')
-              .orderBy('id', descending: true)
-              .limit(1)
-              .get();
-
-      int nextUserId = 1;
-      if (userIdSnapshot.docs.isNotEmpty) {
-        final lastUserData =
-            userIdSnapshot.docs.first.data() as Map<String, dynamic>;
-        if (lastUserData.containsKey('id')) {
-          nextUserId = (lastUserData['id'] as int) + 1;
-        }
-      }
-
-      // Step 4: Save user to Firestore with new user_id
-      await FirebaseFirestore.instance.collection('users').add({
-        'id': nextUserId,
-        'full_name': name,
-        'email_Address': email,
-        'accountType': 'Customer',
-        'status': 'pending',
-        'created_at': Timestamp.now(),
-      });
-
-      _showDialog(
-        'Registration Successful',
-        'Your account has been created and is pending approval.',
-      );
-      _clearFields();
-    } catch (e) {
-      String errorMessage;
-
-      if (e is FirebaseAuthException) {
-        errorMessage = e.message ?? 'An unknown authentication error occurred.';
-      } else {
-        errorMessage = e.toString();
-      }
-
-      _showDialog('Registration Error', errorMessage);
+    final user = userCredential.user;
+    if (user == null) {
+      throw Exception("User creation failed.");
     }
+
+    // Step 3: Save user in Firestore (doc name = uid)
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+      'uid': user.uid,
+      'full_name': name,
+      'email_Address': email,
+      'accountType': 'Customer',
+      'created_at': Timestamp.now(),
+    });
+
+    _showDialog(
+      'Registration Successful',
+      'Your account has been created and is pending approval.',
+    );
+    _clearFields();
+  } catch (e) {
+    String errorMessage;
+
+    if (e is FirebaseAuthException) {
+      errorMessage = e.message ?? 'An unknown authentication error occurred.';
+    } else {
+      errorMessage = e.toString();
+    }
+
+    _showDialog('Registration Error', errorMessage);
   }
+}
+
 
   // This is will show the dialog
   void _showDialog(String title, String message) {
