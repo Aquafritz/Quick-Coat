@@ -82,7 +82,7 @@ class _SignInState extends State<SignIn> {
                 color: Colors.white,
                 margin: EdgeInsets.all(20),
                 child: Padding(
-                  padding: const EdgeInsets.all(50.0),
+                  padding: const EdgeInsets.all(40.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -264,7 +264,7 @@ Future<void> _signInWithEmail(String email, String password) async {
 
         switch (accountType) {
           case 'Admin':
-            Get.toNamed('/adminHome');
+            Get.toNamed('/adminDashboard');
             break;
 
           case 'Driver':

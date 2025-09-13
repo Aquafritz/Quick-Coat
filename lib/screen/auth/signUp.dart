@@ -100,7 +100,7 @@ class _SignUpState extends State<SignUp> {
                 color: Colors.white,
                 margin: EdgeInsets.all(10),
                 child: Padding(
-                  padding: const EdgeInsets.all(25.0),
+                  padding: const EdgeInsets.all(20.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
