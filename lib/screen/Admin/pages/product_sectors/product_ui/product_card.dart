@@ -61,7 +61,8 @@ class _ProductCardState extends State<ProductCard> {
                   width: 150,
                   height: 36,
                   child: DropdownButtonFormField<String>(
-                    initialValue: filter,
+                    initialValue: filter, // old code
+                    // value: filter, // new code
                     items: const [
                       DropdownMenuItem(
                         value: "All Products",

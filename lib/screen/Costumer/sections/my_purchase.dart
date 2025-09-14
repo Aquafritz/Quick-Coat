@@ -63,30 +63,33 @@ class _MyPurchaseState extends State<MyPurchase> {
                     ),
                     const SizedBox(height: 16),
                     Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 6,
-                            spreadRadius: 2,
-                          ),
-                        ],
-                      ),
-                      height: MediaQuery.of(context).size.width / 2.8,
-                      width: MediaQuery.of(context).size.width / 1,
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Column(
-                          children: [
-                            _buildNavBar(context),
-                            const SizedBox(height: 20),
-                            _buildSelectedWidget(),
-                          ],
-                        ),
-                      ),
-                    ),
+  decoration: BoxDecoration(
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(12),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.05),
+        blurRadius: 6,
+        spreadRadius: 2,
+      ),
+    ],
+  ),
+  // Remove fixed height and let content decide
+  width: MediaQuery.of(context).size.width,
+  child: Padding(
+    padding: const EdgeInsets.all(10),
+    child: SingleChildScrollView( // ✅ prevent overflow
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildNavBar(context),
+          const SizedBox(height: 20),
+          _buildSelectedWidget(),
+        ],
+      ),
+    ),
+  ),
+),
                   ],
                 ),
               ),
