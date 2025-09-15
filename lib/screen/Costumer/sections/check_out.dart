@@ -532,10 +532,10 @@ class _CheckOutState extends State<CheckOut> {
 
   Widget CartItemWidget(BuildContext context, Map<String, dynamic> item) {
     final imageUrl =
-        item['productImage'] is String
-            ? item['productImage']
-            : (item['productImage'] as List?)?.isNotEmpty == true
-            ? item['productImage'][0]
+        item['productImages'] is String
+            ? item['productImages']
+            : (item['productImages'] as List?)?.isNotEmpty == true
+            ? item['productImages'][0]
             : "https://via.placeholder.com/100";
 
     return Container(

@@ -104,7 +104,7 @@ class CustomerServices {
       final fileName = "$uid-${DateTime.now().millisecondsSinceEpoch}.png";
 
       await Supabase.instance.client.storage
-          .from("Quick Coat/profile_pictures")
+          .from("QuickCoat/profile_pictures")
           .uploadBinary(
             fileName,
             bytes,
@@ -112,7 +112,7 @@ class CustomerServices {
           );
 
       final imageUrl = Supabase.instance.client.storage
-          .from("Quick Coat/profile_pictures")
+          .from("QuickCoat/profile_pictures")
           .getPublicUrl(fileName);
 
       return imageUrl;

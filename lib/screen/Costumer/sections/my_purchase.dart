@@ -263,12 +263,12 @@ class _MyPurchaseState extends State<MyPurchase> {
                         children:
                             cartItems.map((item) {
                               final imageUrl =
-                                  item["productImage"] is String
-                                      ? item["productImage"]
-                                      : (item["productImage"] as List?)
+                                  item["productImages"] is String
+                                      ? item["productImages"]
+                                      : (item["productImages"] as List?)
                                               ?.isNotEmpty ==
                                           true
-                                      ? item["productImage"][0]
+                                      ? item["productImages"][0]
                                       : "https://via.placeholder.com/100";
                               return Container(
                                 margin: const EdgeInsets.only(top: 10),
@@ -453,12 +453,12 @@ class _MyPurchaseState extends State<MyPurchase> {
                         children:
                             cartItems.map((item) {
                               final imageUrl =
-                                  item["productImage"] is String
-                                      ? item["productImage"]
-                                      : (item["productImage"] as List?)
+                                  item["productImages"] is String
+                                      ? item["productImages"]
+                                      : (item["productImages"] as List?)
                                               ?.isNotEmpty ==
                                           true
-                                      ? item["productImage"][0]
+                                      ? item["productImages"][0]
                                       : "https://via.placeholder.com/100";
                               return Container(
                                 margin: const EdgeInsets.only(top: 10),
@@ -566,7 +566,7 @@ class _MyPurchaseState extends State<MyPurchase> {
     );
   }
 
-  static Widget buildProcessing() {
+  Widget buildProcessing() {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
@@ -578,7 +578,7 @@ class _MyPurchaseState extends State<MyPurchase> {
           FirebaseFirestore.instance
               .collection("orders")
               .where("userId", isEqualTo: user.uid)
-              .where("status", isEqualTo: "Processing")
+              .where("status", isEqualTo: "Process")
               .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -643,12 +643,12 @@ class _MyPurchaseState extends State<MyPurchase> {
                         children:
                             cartItems.map((item) {
                               final imageUrl =
-                                  item["productImage"] is String
-                                      ? item["productImage"]
-                                      : (item["productImage"] as List?)
+                                  item["productImages"] is String
+                                      ? item["productImages"]
+                                      : (item["productImages"] as List?)
                                               ?.isNotEmpty ==
                                           true
-                                      ? item["productImage"][0]
+                                      ? item["productImages"][0]
                                       : "https://via.placeholder.com/100";
                               return Container(
                                 margin: const EdgeInsets.only(top: 10),
@@ -757,7 +757,7 @@ class _MyPurchaseState extends State<MyPurchase> {
     );
   }
 
-  static Widget buildShipped() {
+  Widget buildShipped() {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
@@ -834,12 +834,12 @@ class _MyPurchaseState extends State<MyPurchase> {
                         children:
                             cartItems.map((item) {
                               final imageUrl =
-                                  item["productImage"] is String
-                                      ? item["productImage"]
-                                      : (item["productImage"] as List?)
+                                  item["productImages"] is String
+                                      ? item["productImages"]
+                                      : (item["productImages"] as List?)
                                               ?.isNotEmpty ==
                                           true
-                                      ? item["productImage"][0]
+                                      ? item["productImages"][0]
                                       : "https://via.placeholder.com/100";
                               return Container(
                                 margin: const EdgeInsets.only(top: 10),
@@ -948,7 +948,7 @@ class _MyPurchaseState extends State<MyPurchase> {
     );
   }
 
-  static Widget buildDelivered() {
+  Widget buildDelivered() {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
@@ -1025,12 +1025,12 @@ class _MyPurchaseState extends State<MyPurchase> {
                         children:
                             cartItems.map((item) {
                               final imageUrl =
-                                  item["productImage"] is String
-                                      ? item["productImage"]
-                                      : (item["productImage"] as List?)
+                                  item["productImages"] is String
+                                      ? item["productImages"]
+                                      : (item["productImages"] as List?)
                                               ?.isNotEmpty ==
                                           true
-                                      ? item["productImage"][0]
+                                      ? item["productImages"][0]
                                       : "https://via.placeholder.com/100";
                               return Container(
                                 margin: const EdgeInsets.only(top: 10),
@@ -1138,7 +1138,7 @@ class _MyPurchaseState extends State<MyPurchase> {
     );
   }
 
-  static Widget buildCancelled() {
+  Widget buildCancelled() {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
@@ -1150,7 +1150,7 @@ class _MyPurchaseState extends State<MyPurchase> {
           FirebaseFirestore.instance
               .collection("orders")
               .where("userId", isEqualTo: user.uid)
-              .where("status", isEqualTo: "Cancel")
+              .where("status", isEqualTo: "Cancelled")
               .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -1215,12 +1215,12 @@ class _MyPurchaseState extends State<MyPurchase> {
                         children:
                             cartItems.map((item) {
                               final imageUrl =
-                                  item["productImage"] is String
-                                      ? item["productImage"]
-                                      : (item["productImage"] as List?)
+                                  item["productImages"] is String
+                                      ? item["productImages"]
+                                      : (item["productImages"] as List?)
                                               ?.isNotEmpty ==
                                           true
-                                      ? item["productImage"][0]
+                                      ? item["productImages"][0]
                                       : "https://via.placeholder.com/100";
                               return Container(
                                 margin: const EdgeInsets.only(top: 10),
@@ -1328,7 +1328,7 @@ class _MyPurchaseState extends State<MyPurchase> {
     );
   }
 
-  static Widget buildReturnRefund() {
+  Widget buildReturnRefund() {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
@@ -1405,12 +1405,12 @@ class _MyPurchaseState extends State<MyPurchase> {
                         children:
                             cartItems.map((item) {
                               final imageUrl =
-                                  item["productImage"] is String
-                                      ? item["productImage"]
-                                      : (item["productImage"] as List?)
+                                  item["productImages"] is String
+                                      ? item["productImages"]
+                                      : (item["productImages"] as List?)
                                               ?.isNotEmpty ==
                                           true
-                                      ? item["productImage"][0]
+                                      ? item["productImages"][0]
                                       : "https://via.placeholder.com/100";
                               return Container(
                                 margin: const EdgeInsets.only(top: 10),

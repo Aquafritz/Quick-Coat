@@ -35,7 +35,7 @@ class ProductService {
         final filePath = "products/product_${productId}_$i.png";
 
         await _supabase.storage
-            .from('Quick Coat')
+            .from('QuickCoat')
             .uploadBinary(
               filePath,
               images[i],
@@ -43,7 +43,7 @@ class ProductService {
             );
 
         final publicUrl = _supabase.storage
-            .from('Quick Coat')
+            .from('QuickCoat')
             .getPublicUrl(filePath);
         uploadedUrls.add(publicUrl);
       }
@@ -123,7 +123,7 @@ class ProductService {
         final filePathIndex = pathSegments.indexOf('public') + 2;
         if (filePathIndex < pathSegments.length) {
           final filePath = pathSegments.sublist(filePathIndex).join('/');
-          await _supabase.storage.from('Quick Coat').remove([filePath]);
+          await _supabase.storage.from('QuickCoat').remove([filePath]);
         }
       } catch (e) {
         print("Failed to delete image $url: $e");

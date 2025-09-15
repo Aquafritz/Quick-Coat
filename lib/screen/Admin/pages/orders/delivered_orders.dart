@@ -194,10 +194,10 @@ class DeliveredOrders extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: cartItems.map((item) {
-                                  final imageUrl = item["productImage"] is String
-                                      ? item["productImage"]
-                                      : (item["productImage"] as List?)?.isNotEmpty == true
-                                          ? item["productImage"][0]
+                                  final imageUrl = item["productImages"] is String
+                                      ? item["productImages"]
+                                      : (item["productImages"] as List?)?.isNotEmpty == true
+                                          ? item["productImages"][0]
                                           : "https://via.placeholder.com/80";
 
                                   return Padding(
