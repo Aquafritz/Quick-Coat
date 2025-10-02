@@ -14,26 +14,31 @@ class DeliveredOrders extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F5F5),
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: MediaQuery.of(context).size.width / 80,
-              horizontal: MediaQuery.of(context).size.width / 80,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TopBar(),
-                Text(
-                  'Delivered Orders',
-                  style: GoogleFonts.roboto(
-                    fontSize: MediaQuery.of(context).size.width / 70,
-                    fontWeight: FontWeight.bold,
-                  ),
+          child: Column(
+             crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TopBar(),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  vertical: MediaQuery.of(context).size.width / 80,
+                  horizontal: MediaQuery.of(context).size.width / 80,
                 ),
-                sortingCard(context),
-                contextCard(context),
-              ],
-            ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Delivered Orders',
+                      style: GoogleFonts.roboto(
+                        fontSize: MediaQuery.of(context).size.width / 70,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    sortingCard(context),
+                    contextCard(context),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),

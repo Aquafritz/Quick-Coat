@@ -13,6 +13,7 @@ class Sidebar extends StatefulWidget {
 
 class _SidebarState extends State<Sidebar> {
   static bool isOrdersExpanded = false;
+  static bool isDeliveryExpanded = false;
 
   Future<void> _signOut() async {
     try {
@@ -55,7 +56,7 @@ class _SidebarState extends State<Sidebar> {
                       menuItem(Icons.inventory, 'Products', AppRoutes.adminProducts),
 
                       _buildOrdersSection(),
-
+                      _buildDeliveryDrivers(),
                       menuItem(Icons.bar_chart, 'Analytics', AppRoutes.adminAnalytics),
                       menuItem(Icons.settings, 'Settings', AppRoutes.adminSettings),
                     ],
@@ -195,6 +196,51 @@ class _SidebarState extends State<Sidebar> {
       title: Text(title, style: const TextStyle(color: Colors.white70, fontSize: 12)),
       onTap: () {
         setState(() => isOrdersExpanded = true);
+        Get.toNamed(route);
+      },
+      dense: true,
+      visualDensity: VisualDensity.compact,
+    );
+  }
+
+   Widget _buildDeliveryDrivers() {
+    return Theme(
+      data: Theme.of(context).copyWith(
+        dividerColor: Colors.transparent,
+        unselectedWidgetColor: Colors.white70,
+        colorScheme: const ColorScheme.dark(),
+      ),
+      child: ExpansionTile(
+        initiallyExpanded: isDeliveryExpanded,
+        onExpansionChanged: (expanded) {
+          setState(() => isDeliveryExpanded = expanded);
+        },
+        leading: const Icon(Icons.local_shipping_rounded, color: Colors.white, size: 20),
+        title: const Text(
+          "Delivery Driver",
+          style: TextStyle(color: Colors.white, fontSize: 13),
+        ),
+        childrenPadding: const EdgeInsets.only(left: 20),
+        iconColor: Colors.white,
+        collapsedIconColor: Colors.white70,
+        children: [
+          Column(
+            children: [
+              deliverysubMenuItem("Driver List", AppRoutes.driverList),
+              deliverysubMenuItem("Driver Assignment", AppRoutes.driverAssignment),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget deliverysubMenuItem(String title, String route) {
+    return ListTile(
+      leading: const Icon(Icons.arrow_right, color: Colors.white54, size: 18),
+      title: Text(title, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+      onTap: () {
+        setState(() => isDeliveryExpanded = true);
         Get.toNamed(route);
       },
       dense: true,

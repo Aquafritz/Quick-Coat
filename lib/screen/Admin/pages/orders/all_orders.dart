@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:quickcoat/core/colors/app_colors.dart';
 import 'package:quickcoat/screen/Admin/top_bar.dart';
 
 class AllOrders extends StatelessWidget {
@@ -14,26 +13,31 @@ class AllOrders extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F5F5),
       body: SafeArea(
         child: SingleChildScrollView( // ✅ Whole page scrolls
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: MediaQuery.of(context).size.width / 80,
-              horizontal: MediaQuery.of(context).size.width / 80,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TopBar(),
-                Text(
-                  'All Orders',
-                  style: GoogleFonts.roboto(
-                    fontSize: MediaQuery.of(context).size.width / 70,
-                    fontWeight: FontWeight.bold,
-                  ),
+          child: Column(
+             crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TopBar(),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  vertical: MediaQuery.of(context).size.width / 80,
+                  horizontal: MediaQuery.of(context).size.width / 80,
                 ),
-                sortingCard(context),
-                contextCard(context),
-              ],
-            ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'All Orders',
+                      style: GoogleFonts.roboto(
+                        fontSize: MediaQuery.of(context).size.width / 70,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    sortingCard(context),
+                    contextCard(context),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),

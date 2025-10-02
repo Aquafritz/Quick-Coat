@@ -66,7 +66,7 @@ class _FooterState extends State<Footer> {
                           GestureDetector(
                             onTap: () async {
                               final Uri url = Uri.parse(
-                                'https://www.facebook.com',
+                                'https://www.facebook.com/share/1BSB25Rrri/',
                               );
                               if (!await launchUrl(
                                 url,
@@ -89,7 +89,7 @@ class _FooterState extends State<Footer> {
                           GestureDetector(
                             onTap: () async {
                               final Uri url = Uri.parse(
-                                'https://www.instagram.com',
+                                'https://www.instagram.com/quickcoatph/',
                               );
                               if (!await launchUrl(
                                 url,
@@ -111,7 +111,7 @@ class _FooterState extends State<Footer> {
 
                           GestureDetector(
                             onTap: () async {
-                              final Uri url = Uri.parse('https://twitter.com');
+                              final Uri url = Uri.parse('https://x.com/quickcoat?t=1we-g3unPNVglugAu9QkhQ&s=09');
                               if (!await launchUrl(
                                 url,
                                 mode: LaunchMode.externalApplication,
@@ -133,7 +133,7 @@ class _FooterState extends State<Footer> {
                           GestureDetector(
                             onTap: () async {
                               final Uri url = Uri.parse(
-                                'https://www.youtube.com',
+                                'https://youtube.com/@quickcoatph?si=9bF_pBZvH2xXSyYo',
                               );
                               if (!await launchUrl(
                                 url,
@@ -293,7 +293,7 @@ class _FooterState extends State<Footer> {
                       GestureDetector(
                         onTap: () async {
                           final Uri url = Uri.parse(
-                            "https://www.google.com/maps/search/?api=1&query=123+Yagit+Street+Metro+Manila+Philippines",
+                            "https://www.google.com/maps/search/?api=1&query=Domalandan+West+Lingayen+Pangasinan",
                           );
                           if (await canLaunchUrl(url)) {
                             await launchUrl(
@@ -307,7 +307,7 @@ class _FooterState extends State<Footer> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "123  Yagit Street",
+                                  "Domalandan West ",
                                   style: GoogleFonts.inter(
                                     fontSize:
                                         MediaQuery.of(context).size.width / 90,
@@ -319,7 +319,7 @@ class _FooterState extends State<Footer> {
                                       MediaQuery.of(context).size.width / 300,
                                 ),
                                 Text(
-                                  "Metro Manila, Philippines",
+                                  "Lingayen Pangasinan",
                                   style: GoogleFonts.inter(
                                     fontSize:
                                         MediaQuery.of(context).size.width / 90,
@@ -333,7 +333,7 @@ class _FooterState extends State<Footer> {
                       GestureDetector(
                         onTap: () async {
                           await Clipboard.setData(
-                            ClipboardData(text: "quickcoat@psu.edu.ph"),
+                            ClipboardData(text: "quickcoatph@gmail.com"),
                           );
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -344,7 +344,7 @@ class _FooterState extends State<Footer> {
                           );
                         },
                         child: Text(
-                          "Email: quickcoat@psu.edu.ph",
+                          "Email: quickcoatph@gmail.com",
                           style: GoogleFonts.inter(
                             fontSize: MediaQuery.of(context).size.width / 90,
                             color: Colors.white70,
@@ -355,7 +355,7 @@ class _FooterState extends State<Footer> {
                       GestureDetector(
                         onTap: () async {
                           await Clipboard.setData(
-                            ClipboardData(text: "+63 991 938 2645"),
+                            ClipboardData(text: "+63 915 717 4289"),
                           );
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -365,7 +365,7 @@ class _FooterState extends State<Footer> {
                         },
                         child:
                             Text(
-                              "Phone: +63 991 938 2645",
+                              "Phone: +63 915 717 4289",
                               style: GoogleFonts.inter(
                                 fontSize:
                                     MediaQuery.of(context).size.width / 90,

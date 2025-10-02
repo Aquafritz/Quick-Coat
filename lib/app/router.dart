@@ -1,21 +1,19 @@
 import 'package:get/get.dart';
-import 'package:quickcoat/screen/Admin/pages/orders/all_orders.dart';
-import 'package:quickcoat/screen/Admin/pages/orders/cancelled_orders.dart';
-import 'package:quickcoat/screen/Admin/pages/orders/delivered_orders.dart';
-import 'package:quickcoat/screen/Admin/pages/orders/pending_orders.dart';
-import 'package:quickcoat/screen/Admin/pages/orders/processing_orders.dart';
-import 'package:quickcoat/screen/Admin/pages/orders/returnandrefund_orders.dart';
-import 'package:quickcoat/screen/Admin/pages/orders/shipped_orders.dart';
+import 'package:quickcoat/screen/Admin/pages/delivery_driver/driver_informations.dart';
 import 'package:quickcoat/screen/Admin/pages/product_sectors/product_utils_services/add_product.dart';
 import 'package:quickcoat/screen/Costumer/sections/costumer_setting.dart';
 import 'package:quickcoat/screen/Costumer/sections/check_out.dart';
 import 'package:quickcoat/screen/Costumer/sections/my_purchase.dart';
+import 'package:quickcoat/screen/Drivers/sections/driver_delivery_history.dart';
+import 'package:quickcoat/screen/Drivers/sections/driver_profile_setting.dart';
+import 'package:quickcoat/screen/Drivers/sections/driver_vehicle_information.dart';
+import 'package:quickcoat/screen/auth/delivery_rider_signIn.dart';
 import 'package:quickcoat/screen/landing/landing_page.dart';
 import 'package:quickcoat/screen/Admin/AdminLayout.dart'; // <-- new
 import 'package:quickcoat/screen/Costumer/costumerHome.dart';
 import 'package:quickcoat/screen/Costumer/sections/productsdetails.dart';
 import 'package:quickcoat/screen/Costumer/sections/shoppingcart.dart';
-import 'package:quickcoat/screen/Drivers/DriverHome.dart';
+import 'package:quickcoat/screen/Drivers/driver_layout.dart';
 import 'package:quickcoat/screen/auth/forgotPassword.dart';
 import 'package:quickcoat/screen/auth/signIn.dart';
 import 'package:quickcoat/screen/auth/signUp.dart';
@@ -37,12 +35,16 @@ class AppRoutes {
   static const String adminProducts = '/adminProducts';
   
   static const String allOrders = '/allOrders';
-    static const String pendingOrders = '/pendingOrders';
-    static const String processingOrders = '/processingOrders';
+  static const String pendingOrders = '/pendingOrders';
+  static const String processingOrders = '/processingOrders';
   static const String shippedOrders = '/shippedOrders';
   static const String deliveredOrders = '/deliveredOrders';
   static const String cancelledOrders = '/cancelledOrders';
   static const String returnandrefundOrders = '/returnandrefundOrders';
+  static const String viewOrders= '/viewOrders';
+
+  static const String driverList = '/driverList';
+  static const String driverAssignment= '/driverAssignment';
 
   static const String adminAnalytics = '/adminAnalytics';
   static const String adminSettings = '/adminSettings';
@@ -55,6 +57,11 @@ class AppRoutes {
 
   // Driver
   static const String driverHome = '/driverHome';
+  static const String driverDeliveryHistory = '/deliveryHistory';
+  static const String driverProfileSettings = '/profileSettings';
+  static const String driverVehicleInformation = '/vehicleInformation';
+  static const String driverSignIn = '/driverSignIn';
+  static const String driverInformation = '/driverInformations';
 
   // Products
   static const String productDetails = '/productDetails';
@@ -88,7 +95,12 @@ class AppRoutes {
     GetPage(name: costumerPurchase, page: () => MyPurchase()),
 
     // Driver
-    GetPage(name: driverHome, page: () => DriverHome()),
+    GetPage(name: driverHome, page: () => DriverLayout()),
+    GetPage(name: driverDeliveryHistory, page: () => DriverDeliveryHistory()),
+    GetPage(name: driverProfileSettings, page: () => DriverProfileSettings()),
+    GetPage(name: driverVehicleInformation, page: () => DriverVehicleInformation()),
+    GetPage(name: driverSignIn, page: () => RiderLogin()),
+    GetPage(name: driverInformation, page: () => AdminLayout()),
 
     // ✅ All admin routes use same layout
     GetPage(name: adminDashboard, page: () => const AdminLayout()),
@@ -101,13 +113,16 @@ class AppRoutes {
     GetPage(name: deliveredOrders, page: () => const AdminLayout()),
     GetPage(name: cancelledOrders, page: () => const AdminLayout()),
     GetPage(name: returnandrefundOrders, page: () => const AdminLayout()),
+    GetPage(name: viewOrders, page: () => AdminLayout()),
 
     GetPage(name: adminAnalytics, page: () => const AdminLayout()),
     GetPage(name: adminSettings, page: () => const AdminLayout()),
 
-    // Products
     GetPage(name: productDetails, page: () => ProductsDetails()),
     GetPage(name: shoppingCart, page: () => ShoppingCart()),
     GetPage(name: addProduct, page: () => AddProduct()),
+    
+    GetPage(name: driverList, page: () => AdminLayout()),
+    GetPage(name: driverAssignment, page: () => AdminLayout())
   ];
 }

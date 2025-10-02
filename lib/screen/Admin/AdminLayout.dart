@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:quickcoat/screen/Admin/pages/delivery_driver/driver_assignment.dart';
+import 'package:quickcoat/screen/Admin/pages/delivery_driver/driver_informations.dart';
+import 'package:quickcoat/screen/Admin/pages/delivery_driver/driver_list.dart';
 import 'package:quickcoat/screen/Admin/pages/orders/cancelled_orders.dart';
 import 'package:quickcoat/screen/Admin/pages/orders/delivered_orders.dart';
 import 'package:quickcoat/screen/Admin/pages/orders/pending_orders.dart';
 import 'package:quickcoat/screen/Admin/pages/orders/processing_orders.dart';
 import 'package:quickcoat/screen/Admin/pages/orders/returnandrefund_orders.dart';
 import 'package:quickcoat/screen/Admin/pages/orders/shipped_orders.dart';
+import 'package:quickcoat/screen/Admin/pages/orders/view_orders.dart';
 import 'Sidebar.dart';
 import 'pages/DashboardPage.dart';
 import 'pages/product_sectors/ProductsPage.dart';
@@ -47,6 +51,23 @@ class AdminLayout extends StatelessWidget {
         break;
       case AppRoutes.returnandrefundOrders:
         page = ReturnandRefundOrders();
+        break;
+      case AppRoutes.viewOrders:
+  final args = Get.arguments as Map<String, dynamic>;
+  page = ViewOrders(
+    orderData: args["orderData"],
+    orderId: args["orderId"],
+    orderType: args["orderType"] ?? "General", // optional: default fallback
+  );
+      break;
+      case AppRoutes.driverList:
+        page = DriverList();
+        break;
+      case AppRoutes.driverInformation:
+        page = DriverInformations(driver: Get.arguments);
+        break;
+      case AppRoutes.driverAssignment:
+        page = DriverAssignment();
         break;
       case AppRoutes.adminAnalytics:
         page = AnalyticsPage();

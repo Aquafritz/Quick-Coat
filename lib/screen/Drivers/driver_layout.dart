@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:quickcoat/core/colors/app_colors.dart';
+import 'package:quickcoat/screen/Drivers/sections/driver_delivery.dart';
 import 'package:quickcoat/screen/Drivers/sections/driver_home.dart';
+import 'package:quickcoat/screen/Drivers/sections/driver_orders.dart';
+import 'package:quickcoat/screen/Drivers/sections/driver_profile.dart';
 import 'package:water_drop_nav_bar/water_drop_nav_bar.dart';
 
-class DriverHome extends StatefulWidget {
-  const DriverHome({super.key});
+class DriverLayout extends StatefulWidget {
+  const DriverLayout({super.key});
 
   @override
-  State<DriverHome> createState() => _DriverHomeState();
+  State<DriverLayout> createState() => _DriverLayoutState();
 }
 
-class _DriverHomeState extends State<DriverHome> {
+class _DriverLayoutState extends State<DriverLayout> {
   final Color navigationBarColor = Colors.white;
   int selectedIndex = 0;
   late PageController pageController;
@@ -43,30 +46,8 @@ class _DriverHomeState extends State<DriverHome> {
            controller: pageController,
            children: <Widget>[
               DriverHomePage(),
-             Container(
-               alignment: Alignment.center,
-               child: Icon(
-                 Icons.favorite_rounded,
-                 size: 56,
-                 color: Colors.red[400],
-               ),
-             ),
-             Container(
-               alignment: Alignment.center,
-               child: Icon(
-                 Icons.email_rounded,
-                 size: 56,
-                 color: Colors.green[400],
-               ),
-             ),
-             Container(
-               alignment: Alignment.center,
-               child: Icon(
-                 Icons.folder_rounded,
-                 size: 56,
-                 color: Colors.brown[400],
-               ),
-             ),
+              DriverOrders(),
+             DeliveryProfile()
            ],
          ),
        ),
@@ -95,10 +76,6 @@ class _DriverHomeState extends State<DriverHome> {
             BarItem(
               filledIcon: Icons.shopping_bag_rounded, // for Orders
               outlinedIcon: Icons.shopping_bag_outlined,
-            ),
-            BarItem(
-              filledIcon: Icons.local_shipping_rounded, // for Delivery
-              outlinedIcon: Icons.local_shipping_outlined,
             ),
             BarItem(
               filledIcon: Icons.person_rounded, // for Profile

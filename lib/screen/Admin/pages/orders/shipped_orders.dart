@@ -13,27 +13,33 @@ class ShippedOrders extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: SafeArea(
-        child: SingleChildScrollView( // ✅ Whole page scrolls when overflow
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: MediaQuery.of(context).size.width / 80,
-              horizontal: MediaQuery.of(context).size.width / 80,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TopBar(),
-                Text(
-                  'Shipped Orders',
-                  style: GoogleFonts.roboto(
-                    fontSize: MediaQuery.of(context).size.width / 70,
-                    fontWeight: FontWeight.bold,
-                  ),
+        child: SingleChildScrollView(
+          // ✅ Whole page scrolls when overflow
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TopBar(),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  vertical: MediaQuery.of(context).size.width / 80,
+                  horizontal: MediaQuery.of(context).size.width / 80,
                 ),
-                sortingCard(context),
-                contextCard(context),
-              ],
-            ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Shipped Orders',
+                      style: GoogleFonts.roboto(
+                        fontSize: MediaQuery.of(context).size.width / 70,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    sortingCard(context),
+                    contextCard(context),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -112,8 +118,12 @@ class ShippedOrders extends StatelessWidget {
             );
           }
 
-          Widget rowCell(String text, double width,
-              {Color? color, bool bold = false}) {
+          Widget rowCell(
+            String text,
+            double width, {
+            Color? color,
+            bool bold = false,
+          }) {
             return SizedBox(
               width: width,
               child: Text(
@@ -145,10 +155,11 @@ class ShippedOrders extends StatelessWidget {
               ),
               const Divider(),
               StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection("orders")
-                    .where("status", isEqualTo: "Shipped")
-                    .snapshots(),
+                stream:
+                    FirebaseFirestore.instance
+                        .collection("orders")
+                        .where("status", isEqualTo: "Shipped")
+                        .snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -161,20 +172,23 @@ class ShippedOrders extends StatelessWidget {
 
                   return ListView.builder(
                     shrinkWrap: true, // ✅ prevent unbounded height
-                    physics: const NeverScrollableScrollPhysics(), // ✅ disable inner scroll
+                    physics:
+                        const NeverScrollableScrollPhysics(), // ✅ disable inner scroll
                     itemCount: orders.length,
                     itemBuilder: (context, index) {
                       final doc = orders[index];
                       final order = doc.data() as Map<String, dynamic>;
-                      final cartItems =
-                          List<Map<String, dynamic>>.from(order["cartItems"] ?? []);
+                      final cartItems = List<Map<String, dynamic>>.from(
+                        order["cartItems"] ?? [],
+                      );
                       final userDetails =
                           order["userDetails"] as Map<String, dynamic>? ?? {};
-                      final orderDate = (order["timestamp"] is Timestamp)
-                          ? DateFormat('MMM dd, yyyy – hh:mm a').format(
-                              (order["timestamp"] as Timestamp).toDate(),
-                            )
-                          : "-";
+                      final orderDate =
+                          (order["timestamp"] is Timestamp)
+                              ? DateFormat('MMM dd, yyyy – hh:mm a').format(
+                                (order["timestamp"] as Timestamp).toDate(),
+                              )
+                              : "-";
 
                       return Container(
                         key: ValueKey(doc.id),
@@ -193,70 +207,88 @@ class ShippedOrders extends StatelessWidget {
                               width: wProduct,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: cartItems.map((item) {
-                                  final imageUrl = item["productImages"] is String
-                                      ? item["productImages"]
-                                      : (item["productImages"] as List?)?.isNotEmpty == true
-                                          ? item["productImages"][0]
-                                          : "https://via.placeholder.com/80";
+                                children:
+                                    cartItems.map((item) {
+                                      final imageUrl =
+                                          item["productImages"] is String
+                                              ? item["productImages"]
+                                              : (item["productImages"] as List?)
+                                                      ?.isNotEmpty ==
+                                                  true
+                                              ? item["productImages"][0]
+                                              : "https://via.placeholder.com/80";
 
-                                  return Padding(
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 4),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(6),
-                                          child: Image.network(
-                                            imageUrl,
-                                            width: 40,
-                                            height: 40,
-                                            fit: BoxFit.cover,
-                                          ),
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 4,
                                         ),
-                                        const SizedBox(width: 6),
-                                        SizedBox(
-                                          width: wProduct - 50,
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                item["productName"] ?? "No name",
-                                                style: GoogleFonts.roboto(
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                                maxLines: 1,
-                                                overflow:
-                                                    TextOverflow.ellipsis,
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                              child: Image.network(
+                                                imageUrl,
+                                                width: 40,
+                                                height: 40,
+                                                fit: BoxFit.cover,
                                               ),
-                                              Text(
-                                                "x${item["quantity"] ?? 1} • ₱${item["productPrice"] ?? 0}",
-                                                style: GoogleFonts.roboto(
-                                                  fontSize: 11,
-                                                ),
-                                                maxLines: 1,
-                                                overflow:
-                                                    TextOverflow.ellipsis,
+                                            ),
+                                            const SizedBox(width: 6),
+                                            SizedBox(
+                                              width: wProduct - 50,
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    item["productName"] ??
+                                                        "No name",
+                                                    style: GoogleFonts.roboto(
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                  Text(
+                                                    "x${item["quantity"] ?? 1} • ₱${item["productPrice"] ?? 0}",
+                                                    style: GoogleFonts.roboto(
+                                                      fontSize: 11,
+                                                    ),
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ],
                                               ),
-                                            ],
-                                          ),
+                                            ),
+                                          ],
                                         ),
-                                      ],
-                                    ),
-                                  );
-                                }).toList(),
+                                      );
+                                    }).toList(),
                               ),
                             ),
-                            rowCell(userDetails["full_name"] ?? "N/A", wCustomer),
+                            rowCell(
+                              userDetails["full_name"] ?? "N/A",
+                              wCustomer,
+                            ),
                             rowCell(orderDate, wDate),
-                            rowCell("₱${order["total"] ?? 0}", wTotal, bold: true),
-                            rowCell(order["status"] ?? "Shipped", wStatus,
-                                color: Colors.orange.shade700, bold: true),
+                            rowCell(
+                              "₱${order["total"] ?? 0}",
+                              wTotal,
+                              bold: true,
+                            ),
+                            rowCell(
+                              order["status"] ?? "Shipped",
+                              wStatus,
+                              color: Colors.orange.shade700,
+                              bold: true,
+                            ),
                             SizedBox(
                               width: wActions,
                               child: Row(
@@ -266,41 +298,49 @@ class ShippedOrders extends StatelessWidget {
                                   IconButton(
                                     padding: EdgeInsets.zero,
                                     constraints: const BoxConstraints(),
-                                    icon: const Icon(Icons.remove_red_eye,
-                                        color: AppColors.color8),
+                                    icon: const Icon(
+                                      Icons.remove_red_eye,
+                                      color: AppColors.color8,
+                                    ),
                                     onPressed: () {},
                                   ),
-                                  IconButton(
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(),
-                                    icon: const Icon(Icons.local_shipping,
-                                        color: AppColors.color8),
-                                    onPressed: () async {
-                                      try {
-                                        await FirebaseFirestore.instance
-                                            .collection("orders")
-                                            .doc(doc.id)
-                                            .update({"status": "Delivered"});
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                                "Order status updated to Delivered ✅"),
-                                            backgroundColor: Colors.green,
-                                          ),
-                                        );
-                                      } catch (e) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                                "Failed to update: $e"),
-                                            backgroundColor: Colors.red,
-                                          ),
-                                        );
-                                      }
-                                    },
-                                  ),
+                                  // IconButton(
+                                  //   padding: EdgeInsets.zero,
+                                  //   constraints: const BoxConstraints(),
+                                  //   icon: const Icon(
+                                  //     Icons.local_shipping,
+                                  //     color: AppColors.color8,
+                                  //   ),
+                                  //   onPressed: () async {
+                                  //     try {
+                                  //       await FirebaseFirestore.instance
+                                  //           .collection("orders")
+                                  //           .doc(doc.id)
+                                  //           .update({"status": "Delivered"});
+                                  //       ScaffoldMessenger.of(
+                                  //         context,
+                                  //       ).showSnackBar(
+                                  //         const SnackBar(
+                                  //           content: Text(
+                                  //             "Order status updated to Delivered ✅",
+                                  //           ),
+                                  //           backgroundColor: Colors.green,
+                                  //         ),
+                                  //       );
+                                  //     } catch (e) {
+                                  //       ScaffoldMessenger.of(
+                                  //         context,
+                                  //       ).showSnackBar(
+                                  //         SnackBar(
+                                  //           content: Text(
+                                  //             "Failed to update: $e",
+                                  //           ),
+                                  //           backgroundColor: Colors.red,
+                                  //         ),
+                                  //       );
+                                  //     }
+                                  //   },
+                                  // ),
                                 ],
                               ),
                             ),
@@ -318,4 +358,3 @@ class ShippedOrders extends StatelessWidget {
     );
   }
 }
-

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:quickcoat/screen/Drivers/DriverHome.dart';
+import 'package:quickcoat/screen/Drivers/driver_layout.dart';
 import 'package:quickcoat/screen/auth/delivery_rider_signIn.dart';
 import 'package:quickcoat/screen/landing/landing_page.dart';
 import 'router.dart';
@@ -61,7 +61,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           theme: ThemeData(primarySwatch: Colors.blue),
 
           // 👇 Decide initial screen
-          home: isOnMobile ? DriverHome() : LandingPage(),
+          home: isOnMobile ? RiderLogin() : LandingPage(),
 
           getPages: AppRoutes.routes,
           defaultTransition: Transition.fadeIn,

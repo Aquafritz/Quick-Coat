@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:quickcoat/app/router.dart';
 import 'package:quickcoat/core/colors/app_colors.dart';
+import 'package:quickcoat/screen/Admin/pages/orders/view_orders.dart';
 import 'package:quickcoat/screen/Admin/top_bar.dart';
 
 class ReturnandRefundOrders extends StatelessWidget {
@@ -14,26 +17,31 @@ class ReturnandRefundOrders extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F5F5),
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: MediaQuery.of(context).size.width / 80,
-              horizontal: MediaQuery.of(context).size.width / 80,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TopBar(),
-                Text(
-                  'Return & Refund Orders',
-                  style: GoogleFonts.roboto(
-                    fontSize: MediaQuery.of(context).size.width / 70,
-                    fontWeight: FontWeight.bold,
-                  ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TopBar(),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  vertical: MediaQuery.of(context).size.width / 80,
+                  horizontal: MediaQuery.of(context).size.width / 80,
                 ),
-                sortingCard(context),
-                contextCard(context),
-              ],
-            ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Return & Refund Orders',
+                      style: GoogleFonts.roboto(
+                        fontSize: MediaQuery.of(context).size.width / 70,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    sortingCard(context),
+                    contextCard(context),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -91,13 +99,15 @@ class ReturnandRefundOrders extends StatelessWidget {
         builder: (context, constraints) {
           final totalWidth = constraints.maxWidth;
 
-          final wOrderId = totalWidth * 0.12;
-          final wProduct = totalWidth * 0.20;
-          final wCustomer = totalWidth * 0.16;
-          final wDate = totalWidth * 0.16;
-          final wTotal = totalWidth * 0.10;
-          final wStatus = totalWidth * 0.08;
-          final wActions = totalWidth * 0.06;
+          // Define consistent column widths
+          final wOrderId = totalWidth * 0.15;
+          final wProduct = totalWidth * 0.16;
+          final wCustomer = totalWidth * 0.15;
+          final wDate = totalWidth * 0.15;
+          final wTotal = totalWidth * 0.08;
+          final wStatus = totalWidth * 0.10;
+          final wRequest = totalWidth * 0.10;
+          final wActions = totalWidth * 0.07;
 
           Widget headerCell(String text, double width) {
             return SizedBox(
@@ -139,7 +149,8 @@ class ReturnandRefundOrders extends StatelessWidget {
                   headerCell("Customer Name", wCustomer),
                   headerCell("Date", wDate),
                   headerCell("Total", wTotal),
-                  headerCell("Status", wStatus),
+                  headerCell("Order Status", wStatus),
+                  headerCell("Request Status", wRequest),
                   headerCell("Actions", wActions),
                 ],
               ),
@@ -204,12 +215,10 @@ class ReturnandRefundOrders extends StatelessWidget {
                                     padding:
                                         const EdgeInsets.symmetric(vertical: 4),
                                     child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(6),
+                                          borderRadius: BorderRadius.circular(6),
                                           child: Image.network(
                                             imageUrl,
                                             width: 40,
@@ -218,8 +227,7 @@ class ReturnandRefundOrders extends StatelessWidget {
                                           ),
                                         ),
                                         const SizedBox(width: 6),
-                                        SizedBox(
-                                          width: wProduct - 50,
+                                        Expanded(
                                           child: Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
@@ -231,8 +239,7 @@ class ReturnandRefundOrders extends StatelessWidget {
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                                 maxLines: 1,
-                                                overflow:
-                                                    TextOverflow.ellipsis,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                               Text(
                                                 "x${item["quantity"] ?? 1} • ₱${item["productPrice"] ?? 0}",
@@ -240,8 +247,7 @@ class ReturnandRefundOrders extends StatelessWidget {
                                                   fontSize: 11,
                                                 ),
                                                 maxLines: 1,
-                                                overflow:
-                                                    TextOverflow.ellipsis,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                             ],
                                           ),
@@ -255,21 +261,60 @@ class ReturnandRefundOrders extends StatelessWidget {
                             rowCell(userDetails["full_name"] ?? "N/A", wCustomer),
                             rowCell(orderDate, wDate),
                             rowCell("₱${order["total"] ?? 0}", wTotal, bold: true),
-                            rowCell(order["status"] ?? "Return and Refund", wStatus,
+                            rowCell(order["status"] ?? "Return & Refund", wStatus,
                                 color: Colors.orange.shade800, bold: true),
+                            rowCell(order["status1"] ?? "Pending", wRequest,
+                                color: Colors.blue.shade800, bold: true),
                             SizedBox(
                               width: wActions,
                               child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
                                 children: [
+                                    IconButton(
+    padding: EdgeInsets.zero,
+    constraints: const BoxConstraints(),
+    icon: const Icon(Icons.check, color: AppColors.color8),
+    onPressed: () async {
+      try {
+        await FirebaseFirestore.instance
+            .collection("orders")
+            .doc(doc.id)
+            .update({"status1": "approved"});
+
+        Get.snackbar(
+          "Success",
+          "Order has been approved",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green.shade100,
+          colorText: Colors.green.shade800,
+          duration: const Duration(seconds: 2),
+        );
+      } catch (e) {
+        Get.snackbar(
+        "Error",
+        "Failed to approve: $e",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade800,
+        duration: const Duration(seconds: 2),
+      );
+    }
+  },
+),
+
+                                  SizedBox(
+                                    width: wActions / 8,
+                                  ),
                                   IconButton(
                                     padding: EdgeInsets.zero,
                                     constraints: const BoxConstraints(),
                                     icon: const Icon(Icons.remove_red_eye,
                                         color: AppColors.color8),
                                     onPressed: () {
-                                      // TODO: View order details
+                                       Get.to(() => ViewOrders(
+    orderData: order,
+    orderId: doc.id,
+    orderType: "Return&Refund",
+  ));
                                     },
                                   ),
                                 ],

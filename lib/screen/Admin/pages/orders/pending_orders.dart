@@ -14,26 +14,31 @@ class PendingOrders extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F5F5),
       body: SafeArea(
         child: SingleChildScrollView( // ✅ Whole page scrolls when overflow
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: MediaQuery.of(context).size.width / 80,
-              horizontal: MediaQuery.of(context).size.width / 80,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TopBar(),
-                Text(
-                  'Pending Orders',
-                  style: GoogleFonts.roboto(
-                    fontSize: MediaQuery.of(context).size.width / 70,
-                    fontWeight: FontWeight.bold,
-                  ),
+          child: Column(
+             crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TopBar(),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  vertical: MediaQuery.of(context).size.width / 80,
+                  horizontal: MediaQuery.of(context).size.width / 80,
                 ),
-                sortingCard(context),
-                contextCard(context),
-              ],
-            ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Pending Orders',
+                      style: GoogleFonts.roboto(
+                        fontSize: MediaQuery.of(context).size.width / 70,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    sortingCard(context),
+                    contextCard(context),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -317,37 +322,37 @@ class PendingOrders extends StatelessWidget {
                                       }
                                     },
                                   ),
-                                  IconButton(
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(),
-                                    icon: const Icon(Icons.cancel,
-                                        color: Colors.red),
-                                    onPressed: () async {
-                                      try {
-                                        await FirebaseFirestore.instance
-                                            .collection("orders")
-                                            .doc(doc.id)
-                                            .update({"status": "Cancelled"});
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                                "Order status updated to Cancelled ❌"),
-                                            backgroundColor: Colors.red,
-                                          ),
-                                        );
-                                      } catch (e) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                                "Failed to update: $e"),
-                                            backgroundColor: Colors.red,
-                                          ),
-                                        );
-                                      }
-                                    },
-                                  ),
+                                  // IconButton(
+                                  //   padding: EdgeInsets.zero,
+                                  //   constraints: const BoxConstraints(),
+                                  //   icon: const Icon(Icons.cancel,
+                                  //       color: Colors.red),
+                                  //   onPressed: () async {
+                                  //     try {
+                                  //       await FirebaseFirestore.instance
+                                  //           .collection("orders")
+                                  //           .doc(doc.id)
+                                  //           .update({"status": "Cancelled"});
+                                  //       ScaffoldMessenger.of(context)
+                                  //           .showSnackBar(
+                                  //         const SnackBar(
+                                  //           content: Text(
+                                  //               "Order status updated to Cancelled ❌"),
+                                  //           backgroundColor: Colors.red,
+                                  //         ),
+                                  //       );
+                                  //     } catch (e) {
+                                  //       ScaffoldMessenger.of(context)
+                                  //           .showSnackBar(
+                                  //         SnackBar(
+                                  //           content: Text(
+                                  //               "Failed to update: $e"),
+                                  //           backgroundColor: Colors.red,
+                                  //         ),
+                                  //       );
+                                  //     }
+                                  //   },
+                                  // ),
                                 ],
                               ),
                             ),
