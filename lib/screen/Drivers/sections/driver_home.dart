@@ -47,6 +47,18 @@ class DriverHomePage extends StatelessWidget {
     final driverId = FirebaseAuth.instance.currentUser?.uid;
 
     return StreamBuilder<DocumentSnapshot>(
+    stream: FirebaseFirestore.instance
+        .collection("users") // 👈 fetch from users collection
+        .doc(driverId)
+        .snapshots(),
+    builder: (context, userSnapshot) {
+      String driverName = "Driver";
+      if (userSnapshot.hasData && userSnapshot.data!.exists) {
+        final userData = userSnapshot.data!.data() as Map<String, dynamic>;
+        driverName = userData["full_name"] ?? "Driver";
+      }
+
+    return StreamBuilder<DocumentSnapshot>(
       stream:
           FirebaseFirestore.instance
               .collection("assigned_driver_parcel")
@@ -106,9 +118,9 @@ class DriverHomePage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Welcome Back, Full Name!',
+                  'Welcome Back, $driverName!',
                   style: GoogleFonts.roboto(
-                    fontSize: MediaQuery.of(context).size.width / 20,
+                    fontSize: MediaQuery.of(context).size.width / 25,
                     color: Colors.white,
                     fontWeight: FontWeight.w500,
                   ),
@@ -207,6 +219,8 @@ class DriverHomePage extends StatelessWidget {
           ),
         );
       },
+    );
+    }
     );
   }
 

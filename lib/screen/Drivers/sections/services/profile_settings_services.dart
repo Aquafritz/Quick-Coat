@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -60,4 +61,26 @@ Future<Map<String, dynamic>?> fetchUserProfile() async {
 
     return publicUrl;
   }
+
+  Future<String> uploadWebProfilePicture(Uint8List fileBytes) async {
+  final user = _auth.currentUser;
+  if (user == null) throw Exception("No user logged in");
+
+  final fileName =
+      "profile_pictures/${user.uid}_${DateTime.now().millisecondsSinceEpoch}.jpg";
+
+  final res = await _supabase.storage.from("QuickCoat").uploadBinary(
+        fileName,
+        fileBytes,
+        fileOptions: const FileOptions(contentType: "image/jpeg"),
+      );
+
+  if (res.isEmpty) {
+    throw Exception("Failed to upload profile picture");
+  }
+
+  // Get public URL
+  return _supabase.storage.from("QuickCoat").getPublicUrl(fileName);
+}
+
 }

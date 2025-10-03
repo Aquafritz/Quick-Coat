@@ -279,38 +279,38 @@ class ProcessingOrders extends StatelessWidget {
                                         color: AppColors.color8),
                                     onPressed: () {},
                                   ),
-                                  IconButton(
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(),
-                                    icon: const Icon(Icons.local_shipping,
-                                        color: AppColors.color8),
-                                    onPressed: () async {
-                                      try {
-                                        await FirebaseFirestore.instance
-                                            .collection("orders")
-                                            .doc(doc.id)
-                                            .update({"status": "Shipped"});
+                                  // IconButton(
+                                  //   padding: EdgeInsets.zero,
+                                  //   constraints: const BoxConstraints(),
+                                  //   icon: const Icon(Icons.local_shipping,
+                                  //       color: AppColors.color8),
+                                  //   onPressed: () async {
+                                  //     try {
+                                  //       await FirebaseFirestore.instance
+                                  //           .collection("orders")
+                                  //           .doc(doc.id)
+                                  //           .update({"status": "Shipped"});
 
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                                "Order status updated to Shipped 🚚"),
-                                            backgroundColor: Colors.green,
-                                          ),
-                                        );
-                                      } catch (e) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                            content:
-                                                Text("Failed to update: $e"),
-                                            backgroundColor: Colors.red,
-                                          ),
-                                        );
-                                      }
-                                    },
-                                  ),
+                                  //       ScaffoldMessenger.of(context)
+                                  //           .showSnackBar(
+                                  //         const SnackBar(
+                                  //           content: Text(
+                                  //               "Order status updated to Shipped 🚚"),
+                                  //           backgroundColor: Colors.green,
+                                  //         ),
+                                  //       );
+                                  //     } catch (e) {
+                                  //       ScaffoldMessenger.of(context)
+                                  //           .showSnackBar(
+                                  //         SnackBar(
+                                  //           content:
+                                  //               Text("Failed to update: $e"),
+                                  //           backgroundColor: Colors.red,
+                                  //         ),
+                                  //       );
+                                  //     }
+                                  //   },
+                                  // ),
                                 ],
                               ),
                             ),

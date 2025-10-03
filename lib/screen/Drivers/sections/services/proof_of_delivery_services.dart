@@ -1,68 +1,92 @@
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ProofOfDeliveryService {
   final ImagePicker _picker = ImagePicker();
   final supabase = Supabase.instance.client;
 
-  /// Pick image from camera, upload to Supabase Storage bucket 'QuickCoat',
-  /// then update Firestore orders & assigned_driver_parcel
   Future<void> uploadProof({
     required String orderId,
     required List<Map<String, dynamic>> cartItems,
     required BuildContext context,
   }) async {
     try {
-      final XFile? picked = await _picker.pickImage(
-        source: ImageSource.camera,
-        imageQuality: 80,
-      );
-      if (picked == null) return;
+      Uint8List? webImageBytes;
+      File? mobileFile;
+      String filename;
 
-      final file = File(picked.path);
-      final filename = path.basename(picked.path);
+      if (kIsWeb) {
+        // ✅ Web: use FilePicker
+        final result = await FilePicker.platform.pickFiles(
+          type: FileType.image,
+          allowMultiple: false,
+          withData: true, // important for web
+        );
+
+        if (result == null || result.files.single.bytes == null) return;
+
+        webImageBytes = result.files.single.bytes!;
+        filename = result.files.single.name;
+      } else {
+        // ✅ Mobile: use ImagePicker
+        final XFile? picked = await _picker.pickImage(
+          source: ImageSource.camera,
+          imageQuality: 80,
+        );
+        if (picked == null) return;
+
+        mobileFile = File(picked.path);
+        filename = path.basename(picked.path);
+      }
+
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final driverId =
           FirebaseAuth.instance.currentUser?.uid ?? 'unknown_driver';
 
       final supabasePath =
-          'proof_of_delivery/$orderId/${driverId}_$timestamp$filename';
+          'proof_of_delivery/$orderId/${driverId}_$timestamp\_$filename';
 
-      // Upload to Supabase bucket 'QuickCoat'
-      // Upload returns the path as a String, no response.error
-      await supabase.storage
-          .from('QuickCoat')
-          .upload(
-            supabasePath,
-            file,
-            fileOptions: FileOptions(cacheControl: '3600', upsert: true),
-          );
+      // ✅ Upload to Supabase
+      if (kIsWeb && webImageBytes != null) {
+        await supabase.storage.from('QuickCoat').uploadBinary(
+              supabasePath,
+              webImageBytes,
+              fileOptions: const FileOptions(contentType: 'image/jpeg'),
+            );
+      } else if (mobileFile != null) {
+        await supabase.storage.from('QuickCoat').upload(
+              supabasePath,
+              mobileFile,
+              fileOptions: const FileOptions(cacheControl: '3600', upsert: true),
+            );
+      }
 
-      // Get public URL (returns String)
-      final downloadUrl = supabase.storage
-          .from('QuickCoat')
-          .getPublicUrl(supabasePath);
+      // ✅ Get public URL
+      final downloadUrl =
+          supabase.storage.from('QuickCoat').getPublicUrl(supabasePath);
 
-      final ordersRef = FirebaseFirestore.instance
-          .collection('orders')
-          .doc(orderId);
-      final driverParcelRef = FirebaseFirestore.instance
-          .collection('assigned_driver_parcel')
-          .doc(driverId);
+      // ✅ Firestore batch update
+      final ordersRef =
+          FirebaseFirestore.instance.collection('orders').doc(orderId);
+      final driverParcelRef =
+          FirebaseFirestore.instance.collection('assigned_driver_parcel').doc(driverId);
 
       final batch = FirebaseFirestore.instance.batch();
 
-      // Update orders collection
+      // Update `orders`
       batch.set(ordersRef, {
         "proofOfDelivery": FieldValue.arrayUnion([downloadUrl]),
       }, SetOptions(merge: true));
 
-      // Update assigned_driver_parcel
+      // Update `assigned_driver_parcel`
       final driverParcelSnapshot = await driverParcelRef.get();
       if (driverParcelSnapshot.exists) {
         final data = driverParcelSnapshot.data() as Map<String, dynamic>;

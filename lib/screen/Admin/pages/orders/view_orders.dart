@@ -77,6 +77,16 @@ class ViewOrders extends StatelessWidget {
               'MMM dd, yyyy – hh:mm a',
             ).format(orderData["timestamp"].toDate())
             : "-";
+    
+    final cancelledAt = (orderData['cancelledAt'] != null)
+    ? DateFormat('MMM dd, yyyy – hh:mm a')
+        .format(orderData['cancelledAt'].toDate())
+    : "N/A";
+
+final returnRequestedAt = (orderData['returnRequestedAt'] != null)
+    ? DateFormat('MMM dd, yyyy – hh:mm a')
+        .format(orderData['returnRequestedAt'].toDate())
+    : "N/A";
 
     return Container(
       width: MediaQuery.of(context).size.width / 1.5,
@@ -249,12 +259,12 @@ class ViewOrders extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      "${orderData['cancelledAt'] ?? 'N/A'}",
-                      style: GoogleFonts.roboto(
-                        fontSize: MediaQuery.of(context).size.width / 100,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
+  "$cancelledAt",
+  style: GoogleFonts.roboto(
+    fontSize: MediaQuery.of(context).size.width / 100,
+    fontWeight: FontWeight.w400,
+  ),
+),
 
                     SizedBox(height: MediaQuery.of(context).size.width / 90),
                     Text(
@@ -327,13 +337,13 @@ class ViewOrders extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Text(
-                      "${orderData['returnRequestedAt'] ?? 'Pending'}",
-                      style: GoogleFonts.roboto(
-                        fontSize: MediaQuery.of(context).size.width / 100,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
+                   Text(
+  "$returnRequestedAt",
+  style: GoogleFonts.roboto(
+    fontSize: MediaQuery.of(context).size.width / 100,
+    fontWeight: FontWeight.w400,
+  ),
+),
                     SizedBox(height: MediaQuery.of(context).size.width / 90),
                     Text(
                       "Refund Status: ",

@@ -5,6 +5,7 @@ import 'package:quickcoat/screen/header&footer/footer.dart';
 import 'package:quickcoat/screen/landing/sections/second_section.dart';
 import 'package:quickcoat/screen/landing/sections/third_section.dart';
 import 'package:quickcoat/screen/header&footer/header.dart';
+import 'package:quickcoat/screen/landing/sections/video_section.dart';
 import 'package:quickcoat/screen/others/aboutUs.dart';
 
 class LandingPage extends StatefulWidget {
@@ -28,6 +29,7 @@ class _LandingPageState extends State<LandingPage> {
                 child: Column(
                   children: [
                     FirstSection(),
+                    // VideoSection(),
                     SecondSection(),
                     ThirdSection(),
                     Footer(),
