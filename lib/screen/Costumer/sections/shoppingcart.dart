@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:quickcoat/animations/hover_extensions.dart';
+import 'package:quickcoat/animations/toastification.dart';
 import 'package:quickcoat/core/colors/app_colors.dart';
 import 'package:quickcoat/screen/header&footer/headerwithoutsignin.dart';
 
@@ -34,13 +36,23 @@ class _ShoppingCartState extends State<ShoppingCart> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Shopping Cart',
-                      style: GoogleFonts.roboto(
-                        fontSize: MediaQuery.of(context).size.width / 60,
-                        fontWeight: FontWeight.bold,
+                    GestureDetector(
+                      onTap: () {
+                        Get.toNamed('/costumerHome');
+                      },
+                      child: Row(
+                        children: [
+                          Icon(Icons.arrow_back_ios),
+                          Text(
+                            'Shopping Cart',
+                            style: GoogleFonts.roboto(
+                              fontSize: MediaQuery.of(context).size.width / 60,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
+                    ).showCursorOnHover.moveUpOnHover,
                     const SizedBox(height: 10),
                     StreamBuilder<QuerySnapshot>(
                       stream: FirebaseFirestore.instance
@@ -58,7 +70,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
                         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                           return const Padding(
                             padding: EdgeInsets.all(20),
-                            child: Text("Your cart is empty"),
+                            child: Center(child: Text("Your cart is empty")),
                           );
                         }
 
@@ -363,6 +375,17 @@ class _ShoppingCartState extends State<ShoppingCart> {
                   map['id'] = doc.id;
                   return map;
                 }).toList();
+
+                if (selectedMaps.isEmpty) {
+                   Toastify.show(
+                        context,
+                        message: 'No items selected',
+                        description: 'Please select at least one item before proceeding to checkout.',
+                        type: ToastType.warning,
+                      );
+                  return;
+                }
+
                 Get.toNamed('/checkOut', arguments: selectedMaps);
               },
               style: ElevatedButton.styleFrom(

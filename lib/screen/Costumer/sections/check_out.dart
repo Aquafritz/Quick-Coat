@@ -1,14 +1,18 @@
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:quickcoat/animations/animatedTextField.dart';
 import 'package:quickcoat/animations/hover_extensions.dart';
 import 'package:quickcoat/animations/toastification.dart';
 import 'package:quickcoat/core/colors/app_colors.dart';
 import 'package:quickcoat/screen/Costumer/costumer_services.dart';
 import 'package:quickcoat/screen/header&footer/headerwithoutsignin.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CheckOut extends StatefulWidget {
   const CheckOut({super.key});
@@ -18,17 +22,22 @@ class CheckOut extends StatefulWidget {
 }
 
 class _CheckOutState extends State<CheckOut> {
-  User? user;
+fb.User? user;
   List<Map<String, dynamic>> cartItems = [];
   List<Map<String, dynamic>> addresses = [];
   String? selectedAddressLabel;
+  Uint8List? _paymentProofBytes;
+  String? _paymentProofUrl;
 
   Map<String, dynamic>? userDetails;
+
+  String? selectedPaymentMethod;
+  final List<String> paymentMethods = ["Cash on Delivery", "GCash"];
 
   @override
   void initState() {
     super.initState();
-    user = FirebaseAuth.instance.currentUser;
+user = fb.FirebaseAuth.instance.currentUser;
     fetchAddresses();
     fetchUserDetails();
   }
@@ -600,6 +609,11 @@ class _CheckOutState extends State<CheckOut> {
               Text("₱${subtotal.toStringAsFixed(2)}"),
             ],
           ),
+          const SizedBox(height: 12),
+
+          paymentMethodWidget(), // ⬅️ Added here
+          const SizedBox(height: 12),
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: const [Text("Shipping"), Text("Free")],
@@ -624,18 +638,88 @@ class _CheckOutState extends State<CheckOut> {
             child: ElevatedButton(
               onPressed: () async {
                 if (user == null) return;
+
+                if (addresses.isEmpty || selectedAddressLabel == null) {
+                  Toastify.show(
+                    context,
+                    message: 'Address Required',
+                    description:
+                        'Please add and select a delivery address before placing an order.',
+                    type: ToastType.warning,
+                  );
+                  return;
+                }
+
+                  // 🔸 Payment method validation
+  if (selectedPaymentMethod == null || selectedPaymentMethod!.isEmpty) {
+    Toastify.show(
+      context,
+      message: 'Payment Method Required',
+      description:
+          'Please select a payment method before placing your order.',
+      type: ToastType.warning,
+    );
+    return;
+  }
+
                 try {
                   final selectedAddress = addresses.firstWhere(
                     (addr) => addr['label'] == selectedAddressLabel,
                     orElse: () => {},
                   );
+
+                  if (selectedAddress.isEmpty) {
+                    Toastify.show(
+                      context,
+                      message: 'No Address Selected',
+                      description: 'Please choose a delivery address.',
+                      type: ToastType.warning,
+                    );
+                    return;
+                  }
+
+           // ✅ Upload proof of payment if GCash is selected
+    if (selectedPaymentMethod == "GCash" && _paymentProofBytes != null) {
+      try {
+        final fileName =
+            "${user!.uid}_${DateTime.now().millisecondsSinceEpoch}.jpg";
+
+        await Supabase.instance.client.storage
+            .from("QuickCoat/proof_of_payment")
+            .uploadBinary(
+              fileName,
+              _paymentProofBytes!,
+              fileOptions: const FileOptions(upsert: true),
+            );
+
+        final uploadedUrl = Supabase.instance.client.storage
+            .from("QuickCoat/proof_of_payment")
+            .getPublicUrl(fileName);
+
+        _paymentProofUrl = uploadedUrl;
+      } catch (e) {
+        Toastify.show(
+          context,
+          message: 'Upload Failed',
+          description: 'Unable to upload payment proof. $e',
+          type: ToastType.error,
+        );
+        return;
+      }
+    }
+
                   await CustomerServices.placeOrder(
                     userDetails: userDetails,
                     cartItems: cartItems,
                     selectedAddress: selectedAddress,
+                      proofOfPayment: _paymentProofUrl, // 👈 added
+      paymentMethod: selectedPaymentMethod!, // ⬅️ cannot be null
+
                   );
                   setState(() {
-                    cartItems.clear(); 
+                    cartItems.clear();
+                    _paymentProofBytes = null;
+      _paymentProofUrl = null;
                   });
                   Toastify.show(
                     context,
@@ -643,6 +727,7 @@ class _CheckOutState extends State<CheckOut> {
                     description: 'Your order has been successfully placed.',
                     type: ToastType.success,
                   );
+                  Get.toNamed('/costumerHome');
                 } catch (e) {
                   Toastify.show(
                     context,
@@ -683,6 +768,119 @@ class _CheckOutState extends State<CheckOut> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget paymentMethodWidget() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Payment Method",
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        ...paymentMethods.map((method) {
+          return RadioListTile<String>(
+            activeColor: AppColors.color8,
+            value: method,
+            groupValue: selectedPaymentMethod,
+            onChanged: (value) {
+              setState(() {
+                selectedPaymentMethod = value;
+              });
+            },
+            title: Text(
+              method,
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+          );
+        }).toList(),
+
+        // 👇 Only show when GCash is selected
+        if (selectedPaymentMethod == "GCash") ...[
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.color8, width: 1.5),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  "Pay via GCash",
+                  style: GoogleFonts.roboto(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.color8,
+                  ),
+                ),
+                Image.asset(
+                  'assets/images/qrr.png',
+                  scale: MediaQuery.of(context).size.width / 300,
+                ),
+                Text(
+                  "GCash Number: 09163276281", // ✅ Replace with seller’s number
+                  style: GoogleFonts.roboto(
+                    fontSize: MediaQuery.of(context).size.width / 90,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  "Account Name: Quick Coat", // ✅ Replace with seller’s number
+                  style: GoogleFonts.roboto(
+                    fontSize: MediaQuery.of(context).size.width / 90,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: MediaQuery.of(context).size.width / 90),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.color8,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadiusGeometry.circular(12),
+                    ),
+                  ),
+                  onPressed: () async {
+                    final picker = ImagePicker();
+                    final pickedFile = await picker.pickImage(
+                      source: ImageSource.gallery,
+                    );
+
+                    if (pickedFile == null) return;
+
+                    final bytes = await pickedFile.readAsBytes();
+
+                    setState(() {
+                      _paymentProofBytes = bytes;
+                    });
+                  },
+                  child: Text(
+                    'Payment Proof', // ✅ Replace with seller’s number
+                    style: GoogleFonts.roboto(
+                      fontSize: MediaQuery.of(context).size.width / 100,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                if (_paymentProofBytes != null)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.memory(
+                      _paymentProofBytes!,
+                      height: 180,
+                      width: 180,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

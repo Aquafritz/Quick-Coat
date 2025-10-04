@@ -167,10 +167,23 @@ class _CostumerSettingState extends State<CostumerSetting> {
               children: [
                 Padding(
                   padding: EdgeInsets.only(left: MediaQuery.of(context).size.width / 20,),
-                  child: IconButton(
-                    onPressed: () => Get.back(),
-                    icon: Icon(Icons.arrow_back),
-                  ),
+                  child: GestureDetector(
+                      onTap: () {
+                        Get.toNamed('/costumerHome');
+                      },
+                      child: Row(
+                        children: [
+                          Icon(Icons.arrow_back_ios),
+                    Text(
+                      'Profile Settings',
+                      style: GoogleFonts.roboto(
+                        fontSize: MediaQuery.of(context).size.width / 60,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                        ]
+                      )
+                    ).showCursorOnHover.moveUpOnHover,
                 ),
                 SizedBox(
                   height: MediaQuery.of(context).size.width / 60,

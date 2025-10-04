@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:quickcoat/animations/hover_extensions.dart';
 import 'package:quickcoat/animations/toastification.dart';
 import 'package:quickcoat/core/colors/app_colors.dart';
 import 'package:quickcoat/screen/Admin/pages/product_sectors/product_utils_services/product_services.dart';
@@ -15,7 +16,7 @@ class ProductsDetails extends StatefulWidget {
 
 class _ProductsDetailsState extends State<ProductsDetails> {
   final ProductService _productService = ProductService();
-  int quantity = 0;
+  int quantity = 10;
   late String selectedImage;
   Color? selectedColor;
   String? selectedSize;
@@ -53,12 +54,23 @@ class _ProductsDetailsState extends State<ProductsDetails> {
               padding: EdgeInsets.symmetric(
                 horizontal: MediaQuery.of(context).size.width / 29,
               ),
-              child: IconButton(
-                onPressed: () {
-                  Get.back();
-                },
-                icon: Icon(Icons.arrow_back),
-              ),
+              child:  GestureDetector(
+                      onTap: () {
+                        Get.toNamed('/costumerHome');
+                      },
+                      child: Row(
+                        children: [
+                          Icon(Icons.arrow_back_ios),
+                    Text(
+                      'Product Details',
+                      style: GoogleFonts.roboto(
+                        fontSize: MediaQuery.of(context).size.width / 60,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                        ]
+                      )
+                    ).showCursorOnHover.moveUpOnHover,
             ),
             Expanded(
               child: SingleChildScrollView(
@@ -310,7 +322,7 @@ class _ProductsDetailsState extends State<ProductsDetails> {
                             Row(
                               children: [
                                 _buildQtyButton(Icons.remove, () {
-                                  if (quantity > 1) {
+                                  if (quantity > 10) {
                                     setState(() {
                                       quantity--;
                                     });

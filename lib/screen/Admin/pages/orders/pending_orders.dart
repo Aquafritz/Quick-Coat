@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:quickcoat/core/colors/app_colors.dart';
+import 'package:quickcoat/screen/Admin/pages/orders/view_orders.dart';
 import 'package:quickcoat/screen/Admin/top_bar.dart';
 
 class PendingOrders extends StatelessWidget {
@@ -289,7 +291,13 @@ class PendingOrders extends StatelessWidget {
                                     constraints: const BoxConstraints(),
                                     icon: const Icon(Icons.remove_red_eye,
                                         color: AppColors.color8),
-                                    onPressed: () {},
+                                    onPressed: () {
+                                       Get.to(() => ViewOrders(
+    orderData: order,
+    orderId: doc.id,
+    orderType: "Pending",
+  ));
+                                    },
                                   ),
                                   IconButton(
                                     padding: EdgeInsets.zero,

@@ -157,6 +157,10 @@ static Future<void> placeOrder({
   required Map<String, dynamic>? userDetails,
   required List<Map<String, dynamic>> cartItems,
   required Map<String, dynamic>? selectedAddress,
+    String? proofOfPayment, // ✅ added
+      required String paymentMethod, // 👈 add this
+
+
 }) async {
   if (uid == null) return;
 
@@ -178,6 +182,9 @@ static Future<void> placeOrder({
       "total": subtotal,
       "status": "Pending",
       "timestamp": FieldValue.serverTimestamp(),
+            if (proofOfPayment != null) "proof_of_payment": proofOfPayment, // ✅ add only if uploaded
+    'payment_method': paymentMethod, // 👈 save it here
+
     };
 
     await _firestore.collection("orders").add(orderData);

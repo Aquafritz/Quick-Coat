@@ -233,7 +233,54 @@ final returnRequestedAt = (orderData['returnRequestedAt'] != null)
                     ),
                   ),
                   SizedBox(height: MediaQuery.of(context).size.width / 90),
-
+                  if (orderType == "Pending") ...[
+  Text(
+    "Payment Method: ",
+    style: GoogleFonts.roboto(
+      fontSize: MediaQuery.of(context).size.width / 90,
+      fontWeight: FontWeight.bold,
+    ),
+  ),
+  if ((orderData['payment_method'] ?? '').toString() == 'GCash') ...[
+    Text(
+      "GCash",
+      style: GoogleFonts.roboto(
+        fontSize: MediaQuery.of(context).size.width / 100,
+        fontWeight: FontWeight.w400,
+      ),
+    ),
+    const SizedBox(height: 8),
+    if (orderData['proof_of_payment'] != null &&
+        orderData['proof_of_payment'].toString().isNotEmpty)
+      ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.network(
+          orderData['proof_of_payment'],
+          width: MediaQuery.of(context).size.width / 8,
+          height: MediaQuery.of(context).size.width / 8,
+          fit: BoxFit.cover,
+        ),
+      )
+    else
+      Text(
+        "No proof of payment uploaded",
+        style: GoogleFonts.roboto(
+          fontSize: MediaQuery.of(context).size.width / 110,
+          fontWeight: FontWeight.w400,
+          color: Colors.redAccent,
+        ),
+      ),
+  ] else ...[
+    Text(
+      "Cash on Delivery",
+      style: GoogleFonts.roboto(
+        fontSize: MediaQuery.of(context).size.width / 100,
+        fontWeight: FontWeight.w400,
+      ),
+    ),
+  ],
+  SizedBox(height: MediaQuery.of(context).size.width / 90),
+],
                   if (orderType == "Cancelled") ...[
                     Text(
                       "Cancellation Reason: ",
