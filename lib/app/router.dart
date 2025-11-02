@@ -21,6 +21,7 @@ import 'package:quickcoat/screen/others/aboutUs.dart';
 import 'package:quickcoat/screen/others/contact.dart';
 import 'package:quickcoat/screen/others/privacyPolicy.dart';
 import 'package:quickcoat/screen/others/terms&condition.dart';
+import 'package:quickcoat/services/success_payment.dart';
 
 class AppRoutes {
   static const String landpage = '/';
@@ -73,6 +74,7 @@ class AppRoutes {
   static const String termsandcondition = '/terms&condition';
   static const String aboutus = '/aboutUs';
   static const String privacypolicy = '/privacyPolicy';
+  static const String successpayment = '/successPayment';
 
   static final routes = [
     GetPage(name: landpage, page: () => LandingPage()),
@@ -87,6 +89,7 @@ class AppRoutes {
     GetPage(name: aboutus, page: () => AboutUs()),
     GetPage(name: privacypolicy, page: () => PrivacyPolicy()),
     GetPage(name: contact, page: () => ContactPage()),
+    GetPage(name: successpayment, page: () => SuccessPayment()),
 
     // Costumer
     GetPage(name: costumerHome, page: () => CostumerHome()),

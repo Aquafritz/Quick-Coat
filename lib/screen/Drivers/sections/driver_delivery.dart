@@ -332,6 +332,34 @@ class _DriverDeliveryState extends State<DriverDelivery> {
                   SizedBox(height: MediaQuery.of(context).size.width / 30),
 
                   // Buttons
+                   SizedBox(
+                        width: MediaQuery.of(context).size.width / 1,
+                        height: MediaQuery.of(context).size.width / 12,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+
+                          // Proof of Delivery button
+                          onPressed: () async {
+                          await proofService.markDeliveryFailed(context, orderId);
+
+                          },
+                          child: Text(
+                            "Failed to Deliver",
+                            style: GoogleFonts.roboto(
+                              fontSize: MediaQuery.of(context).size.width / 35,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                                        SizedBox(height: MediaQuery.of(context).size.width / 30),
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [

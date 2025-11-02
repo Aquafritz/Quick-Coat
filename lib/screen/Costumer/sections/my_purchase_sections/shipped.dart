@@ -57,6 +57,48 @@ Widget buildShipped() {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Container(
+                                                height: MediaQuery.of(context).size.width / 25,
+                          width:  double.infinity,
+                         margin: const EdgeInsets.symmetric(
+                    vertical: 10,
+                    horizontal: 12,
+                  ),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 6,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      
+
+// 🗓️ Estimated Delivery Date
+if (order['estimated_start'] != null && order['estimated_end'] != null) ...[
+  const SizedBox(height: 4),
+  Text(
+    "Estimated Delivery: "
+    "${DateFormat('MMM dd').format((order['estimated_start'] as Timestamp).toDate())} "
+    "- "
+    "${DateFormat('MMM dd, yyyy').format((order['estimated_end'] as Timestamp).toDate())}",
+    style: GoogleFonts.roboto(
+      fontSize: MediaQuery.of(context).size.width / 90,
+      fontWeight: FontWeight.w500,
+      color: Colors.black87,
+    ),
+  ),
+],
+                    ],
+                  ),
+                        ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [

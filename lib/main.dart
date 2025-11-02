@@ -4,9 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'firebase_options.dart';
 import 'app/app.dart';
+import 'package:get_storage/get_storage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await GetStorage.init(); // ✅ Initialize storage
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
 

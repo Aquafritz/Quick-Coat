@@ -55,10 +55,11 @@ class _ShoppingCartState extends State<ShoppingCart> {
                     ).showCursorOnHover.moveUpOnHover,
                     const SizedBox(height: 10),
                     StreamBuilder<QuerySnapshot>(
-                      stream: FirebaseFirestore.instance
-                          .collection("carts")
-                          .where("userId", isEqualTo: user?.uid)
-                          .snapshots(),
+                      stream:
+                          FirebaseFirestore.instance
+                              .collection("carts")
+                              .where("userId", isEqualTo: user?.uid)
+                              .snapshots(),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
@@ -82,15 +83,16 @@ class _ShoppingCartState extends State<ShoppingCart> {
                             Expanded(
                               flex: 2,
                               child: Column(
-                                children: cartItems.map((doc) {
-                                  final item =
-                                      doc.data() as Map<String, dynamic>;
-                                  return CartItemWidget(
-                                    context,
-                                    item,
-                                    doc.id,
-                                  );
-                                }).toList(),
+                                children:
+                                    cartItems.map((doc) {
+                                      final item =
+                                          doc.data() as Map<String, dynamic>;
+                                      return CartItemWidget(
+                                        context,
+                                        item,
+                                        doc.id,
+                                      );
+                                    }).toList(),
                               ),
                             ),
                             SizedBox(
@@ -121,9 +123,10 @@ class _ShoppingCartState extends State<ShoppingCart> {
   ) {
     selectedItems.putIfAbsent(docId, () => true);
 
-    final imageUrl = item["productImages"] is String
-        ? item["productImages"]
-        : (item["productImages"] as List?)?.isNotEmpty == true
+    final imageUrl =
+        item["productImages"] is String
+            ? item["productImages"]
+            : (item["productImages"] as List?)?.isNotEmpty == true
             ? item["productImages"][0]
             : null;
 
@@ -147,18 +150,25 @@ class _ShoppingCartState extends State<ShoppingCart> {
           // ✅ Product Image with fallback
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: imageUrl != null
-                ? Image.network(
-                    imageUrl,
-                    height: 80,
-                    width: 80,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        const Icon(Icons.image_not_supported,
-                            size: 40, color: Colors.grey),
-                  )
-                : const Icon(Icons.image_not_supported,
-                    size: 40, color: Colors.grey),
+            child:
+                imageUrl != null
+                    ? Image.network(
+                      imageUrl,
+                      height: 80,
+                      width: 80,
+                      fit: BoxFit.cover,
+                      errorBuilder:
+                          (context, error, stackTrace) => const Icon(
+                            Icons.image_not_supported,
+                            size: 40,
+                            color: Colors.grey,
+                          ),
+                    )
+                    : const Icon(
+                      Icons.image_not_supported,
+                      size: 40,
+                      color: Colors.grey,
+                    ),
           ),
           const SizedBox(width: 12),
 
@@ -199,13 +209,21 @@ class _ShoppingCartState extends State<ShoppingCart> {
                         children: [
                           GestureDetector(
                             onTap: () {
-                              if ((item["quantity"] ?? 1) > 1) {
+                              if ((item["quantity"] ?? 10) > 10) {
                                 FirebaseFirestore.instance
                                     .collection("carts")
                                     .doc(docId)
                                     .update({
-                                  "quantity": FieldValue.increment(-1),
-                                });
+                                      "quantity": FieldValue.increment(-1),
+                                    });
+                              } else {
+                                Toastify.show(
+                                  context,
+                                  message: 'Minimum order is 10',
+                                  description:
+                                      'You cannot order less than 10 items.',
+                                  type: ToastType.warning,
+                                );
                               }
                             },
                             child: Container(
@@ -241,8 +259,8 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                   .collection("carts")
                                   .doc(docId)
                                   .update({
-                                "quantity": FieldValue.increment(1),
-                              });
+                                    "quantity": FieldValue.increment(1),
+                                  });
                             },
                             child: Container(
                               padding: const EdgeInsets.symmetric(
@@ -339,8 +357,10 @@ class _ShoppingCartState extends State<ShoppingCart> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Order Summary",
-              style: GoogleFonts.roboto(fontWeight: FontWeight.bold)),
+          Text(
+            "Order Summary",
+            style: GoogleFonts.roboto(fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -357,10 +377,14 @@ class _ShoppingCartState extends State<ShoppingCart> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("Total",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              Text("₱${subtotal.toStringAsFixed(2)}",
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              const Text(
+                "Total",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                "₱${subtotal.toStringAsFixed(2)}",
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -368,21 +392,23 @@ class _ShoppingCartState extends State<ShoppingCart> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                final selectedMaps = cartItems
-                    .where((doc) => selectedItems[doc.id] == true)
-                    .map((doc) {
-                  final map = doc.data() as Map<String, dynamic>;
-                  map['id'] = doc.id;
-                  return map;
-                }).toList();
+                final selectedMaps =
+                    cartItems.where((doc) => selectedItems[doc.id] == true).map(
+                      (doc) {
+                        final map = doc.data() as Map<String, dynamic>;
+                        map['id'] = doc.id;
+                        return map;
+                      },
+                    ).toList();
 
                 if (selectedMaps.isEmpty) {
-                   Toastify.show(
-                        context,
-                        message: 'No items selected',
-                        description: 'Please select at least one item before proceeding to checkout.',
-                        type: ToastType.warning,
-                      );
+                  Toastify.show(
+                    context,
+                    message: 'No items selected',
+                    description:
+                        'Please select at least one item before proceeding to checkout.',
+                    type: ToastType.warning,
+                  );
                   return;
                 }
 
@@ -395,8 +421,10 @@ class _ShoppingCartState extends State<ShoppingCart> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: Text("Proceed to Checkout",
-                  style: GoogleFonts.roboto(color: Colors.white)),
+              child: Text(
+                "Proceed to Checkout",
+                style: GoogleFonts.roboto(color: Colors.white),
+              ),
             ),
           ),
           const SizedBox(height: 10),

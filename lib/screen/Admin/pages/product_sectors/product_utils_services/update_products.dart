@@ -46,6 +46,7 @@ class _UpdateProductState extends State<UpdateProduct> {
               'productSize': TextEditingController(text: variant['productSize']),
               'productColor': TextEditingController(text: variant['productColor']),
               'productQuantity': TextEditingController(text: variant['productQuantity'].toString()),
+              'productSizedDescription': TextEditingController(text: variant['productSizedDescription'] ?? "")
             })
         .toList();
   }
@@ -56,6 +57,7 @@ class _UpdateProductState extends State<UpdateProduct> {
         'productSize': TextEditingController(),
         'productColor': TextEditingController(),
         'productQuantity': TextEditingController(),
+        'productSizedDescription': TextEditingController()
       });
     });
   }
@@ -72,6 +74,7 @@ class _UpdateProductState extends State<UpdateProduct> {
         'productSize': vc['productSize']!.text.trim(),
         'productColor': vc['productColor']!.text.trim(),
         'productQuantity': int.tryParse(vc['productQuantity']!.text.trim()) ?? 0,
+        'productSizedDescription': vc['productSizedDescription']!.text.trim()
       };
     }).toList();
   }
@@ -219,42 +222,87 @@ Column(
       var controllers = entry.value;
       return Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).size.width / 130),
-        child: Row(
+        child: Column(
           children: [
-            Expanded(
-              child: AnimatedTextField(
-                controller: controllers['productSize'],
-                label: 'Size',
-                suffix: null,
-                readOnly: false,
-                prefix: const Icon(Icons.straighten),
-              ),
+            Row(
+              children: [
+                SizedBox(
+                    height: MediaQuery.of(context).size.width / 30,
+                  width: MediaQuery.of(context).size.width / 9,
+                  child: AnimatedTextField(
+                    controller: controllers['productSize'],
+                    label: 'Size',
+                    suffix: null,
+                    readOnly: false,
+                    prefix: const Icon(Icons.straighten),
+                  ),
+                ),
+        const SizedBox(width: 10),
+                  SizedBox(
+                      height: MediaQuery.of(context).size.width / 30,
+                    width: MediaQuery.of(context).size.width / 9,
+                    child: AnimatedTextField(
+                        controller: controllers['productSizedDescription'],
+                        label: 'Size Description',
+                      suffix: null,
+                      readOnly: false,
+                        prefix: const Icon(Icons.description_outlined),
+                    ),
+                  ),
+              
+              ]),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    SizedBox(
+                        height: MediaQuery.of(context).size.width / 30,
+                    width: MediaQuery.of(context).size.width / 9,
+                      child: AnimatedTextField(
+                        controller: controllers['productQuantity'],
+                        label: 'Quantity',
+                        suffix: null,
+                        readOnly: false,
+                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        prefix: const Icon(Icons.format_list_numbered),
+                      ),
+                    ),
+                            const SizedBox(width: 10),
+
+                     SizedBox(
+                        height: MediaQuery.of(context).size.width / 30,
+                    width: MediaQuery.of(context).size.width / 9,
+                       child: AnimatedTextField(
+                         controller: controllers['productColor'],
+                         label: 'Color',
+                         suffix: null,
+                         readOnly: false,
+                         prefix: const Icon(Icons.color_lens),
+                       ),
+                     ),
+                IconButton(
+                  onPressed: () => _removeVariant(index),
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: AnimatedTextField(
-                controller: controllers['productColor'],
-                label: 'Color',
-                suffix: null,
-                readOnly: false,
-                prefix: const Icon(Icons.color_lens),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: AnimatedTextField(
-                controller: controllers['productQuantity'],
-                label: 'Quantity',
-                suffix: null,
-                readOnly: false,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                prefix: const Icon(Icons.format_list_numbered),
-              ),
-            ),
-            IconButton(
-              onPressed: () => _removeVariant(index),
-              icon: const Icon(Icons.delete, color: Colors.red),
-            ),
+                    const SizedBox(height: 10),
+LayoutBuilder(
+  builder: (context, constraints) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: List.generate(
+        (constraints.maxWidth / 10).floor(),
+        (index) => Container(
+          width: 5,
+          height: 2,
+          color: AppColors.color8.withOpacity(0.6),
+        ),
+      ),
+    );
+  },
+)
+
+
           ],
         ),
       );

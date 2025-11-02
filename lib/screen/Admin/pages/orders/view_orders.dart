@@ -1,3 +1,4 @@
+import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -5,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:quickcoat/animations/hover_extensions.dart';
 import 'package:quickcoat/core/colors/app_colors.dart';
 import 'package:quickcoat/screen/Admin/top_bar.dart';
+import 'package:video_player/video_player.dart';
 
 class ViewOrders extends StatelessWidget {
   final Map<String, dynamic> orderData;
@@ -77,16 +79,20 @@ class ViewOrders extends StatelessWidget {
               'MMM dd, yyyy – hh:mm a',
             ).format(orderData["timestamp"].toDate())
             : "-";
-    
-    final cancelledAt = (orderData['cancelledAt'] != null)
-    ? DateFormat('MMM dd, yyyy – hh:mm a')
-        .format(orderData['cancelledAt'].toDate())
-    : "N/A";
 
-final returnRequestedAt = (orderData['returnRequestedAt'] != null)
-    ? DateFormat('MMM dd, yyyy – hh:mm a')
-        .format(orderData['returnRequestedAt'].toDate())
-    : "N/A";
+    final cancelledAt =
+        (orderData['cancelledAt'] != null)
+            ? DateFormat(
+              'MMM dd, yyyy – hh:mm a',
+            ).format(orderData['cancelledAt'].toDate())
+            : "N/A";
+
+    final returnRequestedAt =
+        (orderData['returnRequestedAt'] != null)
+            ? DateFormat(
+              'MMM dd, yyyy – hh:mm a',
+            ).format(orderData['returnRequestedAt'].toDate())
+            : "N/A";
 
     return Container(
       width: MediaQuery.of(context).size.width / 1.5,
@@ -233,54 +239,25 @@ final returnRequestedAt = (orderData['returnRequestedAt'] != null)
                     ),
                   ),
                   SizedBox(height: MediaQuery.of(context).size.width / 90),
-                  if (orderType == "Pending") ...[
-  Text(
-    "Payment Method: ",
-    style: GoogleFonts.roboto(
-      fontSize: MediaQuery.of(context).size.width / 90,
-      fontWeight: FontWeight.bold,
-    ),
-  ),
-  if ((orderData['payment_method'] ?? '').toString() == 'GCash') ...[
-    Text(
-      "GCash",
-      style: GoogleFonts.roboto(
-        fontSize: MediaQuery.of(context).size.width / 100,
-        fontWeight: FontWeight.w400,
-      ),
-    ),
-    const SizedBox(height: 8),
-    if (orderData['proof_of_payment'] != null &&
-        orderData['proof_of_payment'].toString().isNotEmpty)
-      ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Image.network(
-          orderData['proof_of_payment'],
-          width: MediaQuery.of(context).size.width / 8,
-          height: MediaQuery.of(context).size.width / 8,
-          fit: BoxFit.cover,
-        ),
-      )
-    else
-      Text(
-        "No proof of payment uploaded",
-        style: GoogleFonts.roboto(
-          fontSize: MediaQuery.of(context).size.width / 110,
-          fontWeight: FontWeight.w400,
-          color: Colors.redAccent,
-        ),
-      ),
-  ] else ...[
-    Text(
-      "Cash on Delivery",
-      style: GoogleFonts.roboto(
-        fontSize: MediaQuery.of(context).size.width / 100,
-        fontWeight: FontWeight.w400,
-      ),
-    ),
-  ],
-  SizedBox(height: MediaQuery.of(context).size.width / 90),
-],
+                  // 💳 Payment Method (fetched from Firestore)
+                  Text(
+                    "Payment Method:",
+                    style: GoogleFonts.roboto(
+                      fontSize: MediaQuery.of(context).size.width / 90,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    orderData['payment_method'] != null &&
+                            orderData['payment_method'].toString().isNotEmpty
+                        ? orderData['payment_method'].toString()
+                        : "Not specified",
+                    style: GoogleFonts.roboto(
+                      fontSize: MediaQuery.of(context).size.width / 100,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  SizedBox(height: MediaQuery.of(context).size.width / 90),
                   if (orderType == "Cancelled") ...[
                     Text(
                       "Cancellation Reason: ",
@@ -306,12 +283,12 @@ final returnRequestedAt = (orderData['returnRequestedAt'] != null)
                       ),
                     ),
                     Text(
-  "$cancelledAt",
-  style: GoogleFonts.roboto(
-    fontSize: MediaQuery.of(context).size.width / 100,
-    fontWeight: FontWeight.w400,
-  ),
-),
+                      "$cancelledAt",
+                      style: GoogleFonts.roboto(
+                        fontSize: MediaQuery.of(context).size.width / 100,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
 
                     SizedBox(height: MediaQuery.of(context).size.width / 90),
                     Text(
@@ -384,13 +361,13 @@ final returnRequestedAt = (orderData['returnRequestedAt'] != null)
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                   Text(
-  "$returnRequestedAt",
-  style: GoogleFonts.roboto(
-    fontSize: MediaQuery.of(context).size.width / 100,
-    fontWeight: FontWeight.w400,
-  ),
-),
+                    Text(
+                      "$returnRequestedAt",
+                      style: GoogleFonts.roboto(
+                        fontSize: MediaQuery.of(context).size.width / 100,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
                     SizedBox(height: MediaQuery.of(context).size.width / 90),
                     Text(
                       "Refund Status: ",
@@ -406,6 +383,7 @@ final returnRequestedAt = (orderData['returnRequestedAt'] != null)
                         fontWeight: FontWeight.w400,
                       ),
                     ),
+                    buildReturnMediaSection(context),
                   ],
                 ],
               ),
@@ -504,6 +482,24 @@ final returnRequestedAt = (orderData['returnRequestedAt'] != null)
                                     ),
                                   ),
                                   Text(
+                                    "Size Description:",
+                                    style: GoogleFonts.roboto(
+                                      fontSize:
+                                          MediaQuery.of(context).size.width /
+                                          100,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    "${item["productSizedDescription"] ?? ""}",
+                                    style: GoogleFonts.roboto(
+                                      fontSize:
+                                          MediaQuery.of(context).size.width /
+                                          110,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  Text(
                                     "Product Color:",
                                     style: GoogleFonts.roboto(
                                       fontSize:
@@ -571,6 +567,183 @@ final returnRequestedAt = (orderData['returnRequestedAt'] != null)
           ),
         ),
       ),
+    );
+  }
+
+  Widget buildReturnMediaSection(BuildContext context) {
+    final mediaList = orderData['returnMedia'] ?? [];
+
+    if (mediaList.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 10),
+        child: Text(
+          "No attached media",
+          style: GoogleFonts.roboto(
+            fontSize: MediaQuery.of(context).size.width / 100,
+            color: Colors.grey.shade600,
+          ),
+        ),
+      );
+    }
+
+    // Separate videos and images
+    final videoList =
+        mediaList.where((url) {
+          final lower = url.toString().toLowerCase();
+          return lower.endsWith('.mp4') ||
+              lower.endsWith('.mov') ||
+              lower.endsWith('.avi');
+        }).toList();
+
+    final imageList =
+        mediaList.where((url) {
+          final lower = url.toString().toLowerCase();
+          return lower.endsWith('.jpg') ||
+              lower.endsWith('.jpeg') ||
+              lower.endsWith('.png') ||
+              lower.endsWith('.webp');
+        }).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(height: MediaQuery.of(context).size.width / 90),
+        Text(
+          "Attached Media:",
+          style: GoogleFonts.roboto(
+            fontSize: MediaQuery.of(context).size.width / 90,
+            fontWeight: FontWeight.bold,
+            color: AppColors.color8,
+          ),
+        ),
+        Divider(color: AppColors.color8, thickness: 2),
+        const SizedBox(height: 10),
+
+        // 🎥 Show video on top (full width)
+        if (videoList.isNotEmpty) ...[
+          ...videoList.map((url) {
+            return Container(
+              width: 400,
+              margin: const EdgeInsets.only(bottom: 15),
+              height: 250,
+              child: ReturnVideoPlayer(url: url),
+            );
+          }).toList(),
+        ],
+
+        // 🖼️ Show images below in a grid-like layout
+        if (imageList.isNotEmpty)
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children:
+                imageList.map<Widget>((url) {
+                  return GestureDetector(
+                    onTap:
+                        () => showDialog(
+                          context: context,
+                          builder:
+                              (_) => Dialog(
+                                backgroundColor: Colors.black87,
+                                child: InteractiveViewer(
+                                  child: Image.network(
+                                    url,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                              ),
+                        ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        url,
+                        width: 120,
+                        height: 120,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Container(
+                            width: 120,
+                            height: 120,
+                            color: Colors.grey.shade200,
+                            child: const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        },
+                        errorBuilder:
+                            (context, error, stackTrace) => Container(
+                              width: 120,
+                              height: 120,
+                              color: Colors.grey.shade300,
+                              child: const Icon(
+                                Icons.broken_image,
+                                color: Colors.grey,
+                              ),
+                            ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+          ),
+      ],
+    );
+  }
+}
+
+class ReturnVideoPlayer extends StatefulWidget {
+  final String url;
+  const ReturnVideoPlayer({super.key, required this.url});
+
+  @override
+  State<ReturnVideoPlayer> createState() => _ReturnVideoPlayerState();
+}
+
+class _ReturnVideoPlayerState extends State<ReturnVideoPlayer> {
+  late VideoPlayerController _videoController;
+  ChewieController? _chewieController;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeVideo();
+  }
+
+  Future<void> _initializeVideo() async {
+    try {
+      _videoController = VideoPlayerController.networkUrl(
+        Uri.parse(widget.url),
+      );
+      await _videoController.initialize();
+      _chewieController = ChewieController(
+        videoPlayerController: _videoController,
+        autoPlay: false,
+        looping: false,
+        aspectRatio: _videoController.value.aspectRatio,
+      );
+      setState(() => _isLoading = false);
+    } catch (e) {
+      debugPrint("Video load error: $e");
+      setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _videoController.dispose();
+    _chewieController?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Chewie(controller: _chewieController!),
     );
   }
 }

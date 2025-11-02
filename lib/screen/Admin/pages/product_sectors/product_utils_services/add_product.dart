@@ -29,6 +29,7 @@ class _AddProductState extends State<AddProduct> {
   final TextEditingController variantSize = TextEditingController();
   final TextEditingController variantColor = TextEditingController();
   final TextEditingController variantQuantity = TextEditingController();
+  final TextEditingController variantDescription = TextEditingController();
 
   List<Uint8List> _webImages = [];
 
@@ -75,6 +76,7 @@ class _AddProductState extends State<AddProduct> {
       variantSize.clear();
       variantColor.clear();
       variantQuantity.clear();
+      variantDescription.clear;
       setState(() {
         _webImages.clear();
         _variants.clear();
@@ -197,59 +199,91 @@ class _AddProductState extends State<AddProduct> {
                     ),
                   ),
                   SizedBox(height: MediaQuery.of(context).size.width / 130),
-                  Row(
-                      children: [
-                        Expanded(
-                          child: AnimatedTextField(
-                            controller: variantSize,
-                            label: 'Size',
-                            suffix: null,
-                      readOnly: false,
-                            prefix: Icon(Icons.straighten),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: AnimatedTextField(
-                            controller: variantColor,
-                            label: 'Color',
-                            suffix: null,
-                      readOnly: false,
-                            prefix: Icon(Icons.color_lens),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: AnimatedTextField(
-                            controller: variantQuantity,
-                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                            label: 'Quantity',
-                            suffix: null,
-                      readOnly: false,
-                            prefix: Icon(Icons.production_quantity_limits),
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.add, color: AppColors.color9),
-                          onPressed: () {
-                            if (variantSize.text.isNotEmpty &&
-                                variantColor.text.isNotEmpty &&
-                                variantQuantity.text.isNotEmpty) {
-                              setState(() {
-                                _variants.add({
-                                  "productSize": variantSize.text.trim(),
-                                  "productColor": variantColor.text.trim(),
-                                  "productQuantity": int.parse(variantQuantity.text.trim())
-                                });
-                                variantSize.clear();
-                                variantColor.clear();
-                                variantQuantity.clear();
-                              });
-                            }
-                          },
-                        ),
-                      ],
-                    ),
+                  Column(
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+    Row(
+      children: [
+        SizedBox(
+            height: MediaQuery.of(context).size.width / 30,
+                    width: MediaQuery.of(context).size.width / 9,
+          child: AnimatedTextField(
+            controller: variantSize,
+            label: 'Size',
+            prefix: Icon(Icons.straighten),
+            suffix: null,
+            readOnly: false,
+          ),
+        ),
+        const SizedBox(width: 10),
+        SizedBox(
+            height: MediaQuery.of(context).size.width / 30,
+                    width: MediaQuery.of(context).size.width / 7.3,
+          child: AnimatedTextField(
+            controller: variantDescription,
+            label: 'Size Description',
+            prefix: Icon(Icons.description),
+            suffix: null,
+            readOnly: false,
+          ),
+        ),
+        
+      ],
+    ),
+    const SizedBox(height: 10),
+    Row(
+      children: [
+        SizedBox(
+            height: MediaQuery.of(context).size.width / 30,
+                    width: MediaQuery.of(context).size.width / 9,
+          child: AnimatedTextField(
+            controller: variantQuantity,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            label: 'Quantity',
+            prefix: Icon(Icons.production_quantity_limits),
+            suffix: null,
+            readOnly: false,
+          ),
+        ),
+        const SizedBox(width: 10),
+       SizedBox(
+            height: MediaQuery.of(context).size.width / 30,
+                    width: MediaQuery.of(context).size.width / 9,
+          child: AnimatedTextField(
+            controller: variantColor,
+            label: 'Color',
+            prefix: Icon(Icons.color_lens),
+            suffix: null,
+            readOnly: false,
+          ),
+        ),
+        IconButton(
+          icon: Icon(Icons.add, color: AppColors.color9),
+          onPressed: () {
+            if (variantSize.text.isNotEmpty &&
+                variantColor.text.isNotEmpty &&
+                variantQuantity.text.isNotEmpty) {
+              setState(() {
+                _variants.add({
+                  "productSize": variantSize.text.trim(),
+                  "productColor": variantColor.text.trim(),
+                  "productQuantity":
+                      int.parse(variantQuantity.text.trim()),
+                  "productSizedDescription": variantDescription.text.trim(),
+                });
+                variantSize.clear();
+                variantColor.clear();
+                variantQuantity.clear();
+                variantDescription.clear();
+              });
+            }
+          },
+        ),
+      ],
+    ),
+  ],
+),
+
                     const SizedBox(height: 10),
                   
                     // Display Variants
@@ -260,19 +294,25 @@ class _AddProductState extends State<AddProduct> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Column( 
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text("Size: ${variant['productSize']}", style: GoogleFonts.roboto(
-                                                fontSize:  MediaQuery.of(context).size.width / 100,
-                                                
-                                              ),),
-                                              Text("Color: ${variant['productColor']}", style: GoogleFonts.roboto(
-                                                fontSize:  MediaQuery.of(context).size.width / 100,)),
-                                              Text("Quantity: ${variant['productQuantity']}", style: GoogleFonts.roboto(
-                                                fontSize:  MediaQuery.of(context).size.width / 100,)),
-                                            ],
-                                          ),
+                              Expanded(
+                                child: Column( 
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text("Size: ${variant['productSize']}", style: GoogleFonts.roboto(
+                                                  fontSize:  MediaQuery.of(context).size.width / 100,
+                                                  
+                                                ),),
+                                                Text("Size Description: ${variant['productSizedDescription']}", style: GoogleFonts.roboto(
+                                                  fontSize:  MediaQuery.of(context).size.width / 100,
+                                                  
+                                                ),),
+                                                Text("Color: ${variant['productColor']}", style: GoogleFonts.roboto(
+                                                  fontSize:  MediaQuery.of(context).size.width / 100,)),
+                                                Text("Quantity: ${variant['productQuantity']}", style: GoogleFonts.roboto(
+                                                  fontSize:  MediaQuery.of(context).size.width / 100,)),
+                                              ],
+                                            ),
+                              ),
                                             IconButton(
                                         icon: Icon(Icons.delete, color: Colors.red),
                                         onPressed: () {

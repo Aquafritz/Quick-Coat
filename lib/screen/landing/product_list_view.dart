@@ -21,30 +21,57 @@ class _ProductListViewState extends State<ProductListView> {
   List<Map<String, dynamic>> _products = [];
   bool _isLoading = true;
 
-  @override
-  void initState() {
-    super.initState();
-    fetchProducts();
+@override
+void initState() {
+  super.initState();
+  fetchProducts();
 
-    // Start auto-scroll
-    _autoScrollTimer = Timer.periodic(const Duration(seconds: 3), (_) {
-      if (_scrollController.hasClients && _products.isNotEmpty) {
-        final double maxScroll = _scrollController.position.maxScrollExtent;
-        final double current = _scrollController.offset;
+  /// Wait until the widget tree finishes mounting
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    _waitForControllerReady();
+  });
+}
 
-        double nextOffset = current + 200; // scroll step
-        if (nextOffset >= maxScroll) {
-          nextOffset = 0; // loop back
-        }
-
-        _scrollController.animateTo(
-          nextOffset,
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeInOut,
-        );
-      }
-    });
+/// 🕒 Wait until ScrollController is attached to its position
+Future<void> _waitForControllerReady() async {
+  int attempts = 0;
+  while (!_scrollController.hasClients && attempts < 10) {
+    await Future.delayed(const Duration(milliseconds: 300));
+    attempts++;
   }
+
+  if (_scrollController.hasClients && mounted) {
+    _startAutoScroll();
+  } else {
+    debugPrint("⚠️ ScrollController not ready after retries");
+  }
+}
+
+void _startAutoScroll() {
+  _autoScrollTimer?.cancel(); // prevent multiple timers
+
+  _autoScrollTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+    if (!mounted) return;
+    if (!_scrollController.hasClients || _products.isEmpty) return;
+
+    try {
+      final maxScroll = _scrollController.position.maxScrollExtent;
+      final current = _scrollController.offset;
+      double nextOffset = current + 200;
+
+      if (nextOffset >= maxScroll) nextOffset = 0;
+
+      _scrollController.animateTo(
+        nextOffset,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeInOut,
+      );
+    } catch (e) {
+      debugPrint("⚠️ Scroll attempt failed: $e");
+    }
+  });
+}
+
 
   @override
   void dispose() {

@@ -29,6 +29,9 @@ dependencies:
   file_picker: ^10.3.3
   video_player: ^2.10.0
   chewie: ^1.13.0
+  get_storage: ^2.1.1
+  lottie: ^3.3.0
+  uuid: ^4.5.1
 
 dev_dependencies:
   flutter_test:
@@ -50,6 +53,8 @@ flutter:
     - assets/images/bicycle.png
     - assets/images/tricycle.png
     - assets/videos/video.mp4
+    - assets/animations/paymentsuccessful.json
+    - assets/psgc/psgc.json
   # fonts:
   #   - family: Schyler
   #     fonts:

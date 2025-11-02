@@ -180,12 +180,18 @@ Widget buildGridProductCard(
           ExpandableText(
             productVariants
                 .map((variant) {
-                  return "Size: ${variant['productSize']}\n"
-                      "Color: ${variant['productColor']}\n"
-                      "Quantity: ${variant['productQuantity']}";
+                  final size = variant['productSize'] ?? '';
+                  final desc = variant['productSizedDescription'] ?? '';
+                  final color = variant['productColor'] ?? '';
+                  final qty = variant['productQuantity'] ?? '';
+
+                  return "Size: $size\n"
+                      "Size Description: $desc\n"
+                      "Color: $color\n"
+                      "Quantity: $qty";
                 })
                 .join("\n\n"),
-            trimLength: 20,
+            trimLength: 50, // longer text allowed
             style: GoogleFonts.roboto(
               fontSize: MediaQuery.of(context).size.width / 110,
             ),

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -12,6 +13,7 @@ import 'package:quickcoat/screen/Costumer/costumer_services.dart';
 import 'package:quickcoat/screen/header&footer/headerwithoutsignin.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 class CostumerSetting extends StatefulWidget {
   const CostumerSetting({super.key});
@@ -27,7 +29,8 @@ class _CostumerSettingState extends State<CostumerSetting> {
   final TextEditingController houseNumberController = TextEditingController();
   final TextEditingController streetController = TextEditingController();
   final TextEditingController barangayController = TextEditingController();
-  final TextEditingController cityMunicipalityController = TextEditingController();
+  final TextEditingController cityMunicipalityController =
+      TextEditingController();
   final TextEditingController provinceController = TextEditingController();
   final TextEditingController postalCodeController = TextEditingController();
   final TextEditingController countryController = TextEditingController();
@@ -37,10 +40,49 @@ class _CostumerSettingState extends State<CostumerSetting> {
   String? profilePictureUrl;
   Uint8List? pickedImageBytes;
 
+  /// ✅ PSGC local data cache
+  Map<String, dynamic>? psgcData;
+  List<dynamic> provinces = [];
+  List<dynamic> cities = [];
+  List<dynamic> barangays = [];
+
+  Future<void> loadPSGCOffline() async {
+    try {
+      final jsonString = await rootBundle.loadString('assets/psgc/psgc.json');
+      final data = json.decode(jsonString);
+      final List<dynamic> records = data['RECORDS'];
+
+      setState(() {
+        psgcData = {
+          'regions': records.where((r) => r['is_reg'] == "1").toList(),
+          'provinces': records.where((r) => r['is_prov'] == "1").toList(),
+          'cities_municipalities':
+              records
+                  .where(
+                    (r) => r['is_municipality'] == "1" || r['is_city'] == "1",
+                  )
+                  .toList(),
+          'barangays': records.where((r) => r['is_bgy'] == "1").toList(),
+        };
+      });
+      print(
+        "Sample provinces: ${psgcData!['provinces'].take(10).map((p) => p['name']).toList()}",
+      );
+
+      print("✅ PSGC offline data loaded: ${psgcData!.keys}");
+      print("Provinces loaded: ${psgcData!['provinces'].length}");
+      print("Cities loaded: ${psgcData!['cities_municipalities'].length}");
+      print("Barangays loaded: ${psgcData!['barangays'].length}");
+    } catch (e) {
+      print("⚠️ Failed to load PSGC data: $e");
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     loadUserData();
+    loadPSGCOffline(); // ✅ Load PSGC local file
   }
 
   Future<void> loadUserData() async {
@@ -154,6 +196,62 @@ class _CostumerSettingState extends State<CostumerSetting> {
     }
   }
 
+  void loadProvinces() {
+    if (psgcData == null) return;
+    setState(() {
+      provinces = List<Map<String, dynamic>>.from(psgcData!['provinces']);
+    });
+  }
+
+  void loadCities(String provinceName) {
+    if (psgcData == null) return;
+    final province = (psgcData!['provinces'] as List)
+        .cast<Map<String, dynamic>>()
+        .firstWhere(
+          (p) =>
+              p['name'].toString().toLowerCase() == provinceName.toLowerCase(),
+          orElse: () => {},
+        );
+    if (province.isEmpty) {
+      setState(() {
+        cities = [];
+        barangays = [];
+      });
+      return;
+    }
+
+    setState(() {
+      cities =
+          (psgcData!['cities_municipalities'] as List)
+              .where((c) => c['parent_id'] == province['id'])
+              .toList();
+      barangays = [];
+    });
+  }
+
+  void loadBarangays(String cityName) {
+    if (psgcData == null) return;
+    final city = (psgcData!['cities_municipalities'] as List)
+        .cast<Map<String, dynamic>>()
+        .firstWhere(
+          (c) => c['name'].toString().toLowerCase() == cityName.toLowerCase(),
+          orElse: () => {},
+        );
+    if (city.isEmpty) {
+      setState(() {
+        barangays = [];
+      });
+      return;
+    }
+
+    setState(() {
+      barangays =
+          (psgcData!['barangays'] as List)
+              .where((b) => b['parent_id'] == city['id'])
+              .toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -166,28 +264,30 @@ class _CostumerSettingState extends State<CostumerSetting> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: EdgeInsets.only(left: MediaQuery.of(context).size.width / 20,),
-                  child: GestureDetector(
-                      onTap: () {
-                        Get.toNamed('/costumerHome');
-                      },
-                      child: Row(
-                        children: [
-                          Icon(Icons.arrow_back_ios),
-                    Text(
-                      'Profile Settings',
-                      style: GoogleFonts.roboto(
-                        fontSize: MediaQuery.of(context).size.width / 60,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                        ]
-                      )
-                    ).showCursorOnHover.moveUpOnHover,
+                  padding: EdgeInsets.only(
+                    left: MediaQuery.of(context).size.width / 20,
+                  ),
+                  child:
+                      GestureDetector(
+                        onTap: () {
+                          Get.toNamed('/costumerHome');
+                        },
+                        child: Row(
+                          children: [
+                            Icon(Icons.arrow_back_ios),
+                            Text(
+                              'Profile Settings',
+                              style: GoogleFonts.roboto(
+                                fontSize:
+                                    MediaQuery.of(context).size.width / 60,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ).showCursorOnHover.moveUpOnHover,
                 ),
-                SizedBox(
-                  height: MediaQuery.of(context).size.width / 60,
-                ),
+                SizedBox(height: MediaQuery.of(context).size.width / 60),
                 Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: MediaQuery.of(context).size.width / 20,
@@ -518,7 +618,7 @@ class _CostumerSettingState extends State<CostumerSetting> {
     );
   }
 
-  void showAddressDialog({
+  Future<void> showAddressDialog({
     required BuildContext context,
     String? addressId,
     String? label,
@@ -529,7 +629,7 @@ class _CostumerSettingState extends State<CostumerSetting> {
     String? province,
     String? postalCode,
     String? country,
-  }) {
+  }) async {
     labelController.text = label ?? '';
     houseNumberController.text = houseNumber ?? '';
     streetController.text = street ?? '';
@@ -537,176 +637,574 @@ class _CostumerSettingState extends State<CostumerSetting> {
     cityMunicipalityController.text = cityMunicipality ?? '';
     provinceController.text = province ?? '';
     postalCodeController.text = postalCode ?? '';
-    countryController.text = country ?? '';
+    countryController.text = country ?? 'Philippines';
+
+    if (psgcData == null) {
+      Toastify.show(
+        context,
+        message: "PSGC data not loaded yet",
+        description: "Please wait a few seconds and try again.",
+        type: ToastType.warning,
+      );
+      return;
+    }
+
+    if (provinces.isEmpty) {
+      loadProvinces();
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          title: Text(addressId == null ? "New Address" : "Edit Address"),
-          content: SingleChildScrollView(
-            child: Column(
-              children: [
-                Row(
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              title: Text(addressId == null ? "New Address" : "Edit Address"),
+              content: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width / 8,
-                      height: MediaQuery.of(context).size.width / 25,
-                      child: AnimatedTextField(
-                        controller: labelController,
-                        label: 'Address Label',
-                        suffix: null,
-                        readOnly: false,
-                      ),
+                    // 1️⃣ Address Label + Province
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width / 8,
+                          height: MediaQuery.of(context).size.width / 25,
+                          child: TextField(
+                            controller: labelController,
+                            decoration: InputDecoration(
+                              labelText: 'Address Label',
+                              alignLabelWithHint:
+                                  true, // ✅ keeps label aligned inside top-left
+                              filled: true, // ✅ enable white background
+                              fillColor: Colors.white, // ✅ white background
+                              labelStyle: const TextStyle(
+                                color: Colors.black54,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 15,
+                                vertical: 14,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(
+                                  color: Colors.black26,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(
+                                  color: Colors.black26,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(
+                                  color: AppColors.color9,
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: MediaQuery.of(context).size.width / 50),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width / 8,
+                          height: MediaQuery.of(context).size.width / 25,
+                          child: Autocomplete<String>(
+                            optionsBuilder: (TextEditingValue value) {
+                              if (value.text.isEmpty)
+                                return const Iterable<String>.empty();
+                              final List<dynamic> provList =
+                                  psgcData!['provinces'] ?? [];
+                              final matches =
+                                  provList
+                                      .map((p) => p['name'])
+                                      .whereType<String>() // ✅ ignore nulls
+                                      .where(
+                                        (n) => n.toLowerCase().contains(
+                                          value.text.toLowerCase(),
+                                        ),
+                                      )
+                                      .toList();
+                              return matches;
+                            },
+
+                            onSelected: (selection) {
+                              provinceController.text = selection;
+                              loadCities(selection);
+                              setStateDialog(() {});
+                            },
+                            fieldViewBuilder: (
+                              context,
+                              controller,
+                              focusNode,
+                              onFieldSubmitted,
+                            ) {
+                              controller.text = provinceController.text;
+                              return SizedBox(
+                                child: TextField(
+                                  controller: controller,
+                                  focusNode: focusNode,
+                                  decoration: InputDecoration(
+                                    labelText: 'Province',
+                                    alignLabelWithHint:
+                                        true, // ✅ keeps label aligned inside top-left
+                                    filled: true, // ✅ enable white background
+                                    fillColor:
+                                        Colors.white, // ✅ white background
+                                    labelStyle: const TextStyle(
+                                      color: Colors.black54,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 15,
+                                      vertical: 14,
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: const BorderSide(
+                                        color: Colors.black26,
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: const BorderSide(
+                                        color: Colors.black26,
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: const BorderSide(
+                                        color: AppColors.color9,
+                                        width: 2,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     ),
-                    SizedBox(width: MediaQuery.of(context).size.width / 30),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width / 8,
-                      height: MediaQuery.of(context).size.width / 25,
-                      child: AnimatedTextField(
-                        controller: houseNumberController,
-                        label: 'House Number',
-                        suffix: null,
-                        readOnly: false,
-                      ),
+                    SizedBox(height: MediaQuery.of(context).size.width / 150),
+
+                    // 2️⃣ City/Municipality + Barangay
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width / 8,
+                          height: MediaQuery.of(context).size.width / 25,
+                          child: Autocomplete<String>(
+                            optionsBuilder: (TextEditingValue value) {
+                              if (value.text.isEmpty)
+                                return const Iterable<String>.empty();
+
+                              final List<dynamic> rawList =
+                                  cities.isNotEmpty
+                                      ? cities
+                                      : (psgcData!['cities_municipalities'] ??
+                                          []);
+
+                              final List<String> matches = [];
+                              for (final item in rawList) {
+                                if (item is Map && item['name'] != null) {
+                                  final name = item['name'].toString();
+                                  if (name.toLowerCase().contains(
+                                    value.text.toLowerCase(),
+                                  )) {
+                                    matches.add(name);
+                                  }
+                                }
+                              }
+
+                              print(
+                                "🏙 Found ${matches.length} city matches for '${value.text}'",
+                              );
+                              return matches;
+                            },
+
+                            onSelected: (selection) {
+                              cityMunicipalityController.text = selection;
+                              loadBarangays(selection);
+                              setStateDialog(() {});
+                            },
+                            fieldViewBuilder: (
+                              context,
+                              controller,
+                              focusNode,
+                              onFieldSubmitted,
+                            ) {
+                              controller.text = cityMunicipalityController.text;
+                              return TextField(
+                                controller: controller,
+                                focusNode: focusNode,
+                                decoration: InputDecoration(
+                                  labelText: 'City/Municipality',
+                                  alignLabelWithHint:
+                                      true, // ✅ keeps label aligned inside top-left
+                                  filled: true, // ✅ enable white background
+                                  fillColor: Colors.white, // ✅ white background
+                                  labelStyle: const TextStyle(
+                                    color: Colors.black54,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 15,
+                                    vertical: 14,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: const BorderSide(
+                                      color: Colors.black26,
+                                    ),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: const BorderSide(
+                                      color: Colors.black26,
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: const BorderSide(
+                                      color: AppColors.color9,
+                                      width: 2,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        SizedBox(width: MediaQuery.of(context).size.width / 50),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width / 8,
+                          height: MediaQuery.of(context).size.width / 25,
+                          child: Autocomplete<String>(
+                            optionsBuilder: (TextEditingValue value) {
+                              if (value.text.isEmpty)
+                                return const Iterable<String>.empty();
+
+                              final List<dynamic> rawList =
+                                  barangays.isNotEmpty
+                                      ? barangays
+                                      : (psgcData!['barangays'] ?? []);
+
+                              final List<String> matches = [];
+                              for (final item in rawList) {
+                                if (item is Map && item['name'] != null) {
+                                  final name = item['name'].toString();
+                                  if (name.toLowerCase().contains(
+                                    value.text.toLowerCase(),
+                                  )) {
+                                    matches.add(name);
+                                  }
+                                }
+                              }
+
+                              print(
+                                "🏘 Found ${matches.length} barangay matches for '${value.text}'",
+                              );
+                              return matches;
+                            },
+
+                            onSelected: (selection) {
+                              barangayController.text = selection;
+                            },
+                            fieldViewBuilder: (
+                              context,
+                              controller,
+                              focusNode,
+                              onFieldSubmitted,
+                            ) {
+                              controller.text = barangayController.text;
+                              return TextField(
+                                controller: controller,
+                                focusNode: focusNode,
+                                decoration: InputDecoration(
+                                  labelText: 'Barangay',
+                                  alignLabelWithHint:
+                                      true, // ✅ keeps label aligned inside top-left
+                                  filled: true, // ✅ enable white background
+                                  fillColor: Colors.white, // ✅ white background
+                                  labelStyle: const TextStyle(
+                                    color: Colors.black54,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 15,
+                                    vertical: 14,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: const BorderSide(
+                                      color: Colors.black26,
+                                    ),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: const BorderSide(
+                                      color: Colors.black26,
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: const BorderSide(
+                                      color: AppColors.color9,
+                                      width: 2,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.width / 150),
+
+                    // 3️⃣ Street + House Number
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width / 8,
+                          height: MediaQuery.of(context).size.width / 25,
+                          child: TextField(
+                            controller: streetController,
+                            decoration: InputDecoration(
+                              labelText: 'Street',
+                              alignLabelWithHint:
+                                  true, // ✅ keeps label aligned inside top-left
+                              filled: true, // ✅ enable white background
+                              fillColor: Colors.white, // ✅ white background
+                              labelStyle: const TextStyle(
+                                color: Colors.black54,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 15,
+                                vertical: 14,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(
+                                  color: Colors.black26,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(
+                                  color: Colors.black26,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(
+                                  color: AppColors.color9,
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: MediaQuery.of(context).size.width / 50),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width / 8,
+                          height: MediaQuery.of(context).size.width / 25,
+                          child: TextField(
+                            controller: houseNumberController,
+                            decoration: InputDecoration(
+                              labelText: 'House Number',
+                              alignLabelWithHint:
+                                  true, // ✅ keeps label aligned inside top-left
+                              filled: true, // ✅ enable white background
+                              fillColor: Colors.white, // ✅ white background
+                              labelStyle: const TextStyle(
+                                color: Colors.black54,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 15,
+                                vertical: 14,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(
+                                  color: Colors.black26,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(
+                                  color: Colors.black26,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(
+                                  color: AppColors.color9,
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.width / 150),
+
+                    // 4️⃣ Postal Code + Country
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width / 8,
+                          height: MediaQuery.of(context).size.width / 25,
+                          child: TextField(
+                            controller: postalCodeController,
+                            decoration: InputDecoration(
+                              labelText: 'Postal Code',
+                              alignLabelWithHint:
+                                  true, // ✅ keeps label aligned inside top-left
+                              filled: true, // ✅ enable white background
+                              fillColor: Colors.white, // ✅ white background
+                              labelStyle: const TextStyle(
+                                color: Colors.black54,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 15,
+                                vertical: 14,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(
+                                  color: Colors.black26,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(
+                                  color: Colors.black26,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(
+                                  color: AppColors.color9,
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: MediaQuery.of(context).size.width / 50),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width / 8,
+                          height: MediaQuery.of(context).size.width / 25,
+                          child: TextField(
+                            controller: countryController,
+                            decoration: InputDecoration(
+                              labelText: 'Country',
+                              alignLabelWithHint:
+                                  true, // ✅ keeps label aligned inside top-left
+                              filled: true, // ✅ enable white background
+                              fillColor: Colors.white, // ✅ white background
+                              labelStyle: const TextStyle(
+                                color: Colors.black54,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 15,
+                                vertical: 14,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(
+                                  color: Colors.black26,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(
+                                  color: Colors.black26,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(
+                                  color: AppColors.color9,
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                SizedBox(height: MediaQuery.of(context).size.width / 90),
+              ),
+              actions: [
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width / 8,
-                      height: MediaQuery.of(context).size.width / 25,
-                      child: AnimatedTextField(
-                        controller: streetController,
-                        label: 'Street',
-                        suffix: null,
-                        readOnly: false,
+                    GestureDetector(
+                      onTap: () => Get.back(),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(
+                            MediaQuery.of(context).size.width / 100,
+                          ),
+                          color: Colors.red,
+                        ),
+                        height: MediaQuery.of(context).size.width / 40,
+                        width: MediaQuery.of(context).size.width / 7.5,
+                        child: Center(
+                          child: Text(
+                            'Cancel',
+                            style: GoogleFonts.roboto(
+                              color: Colors.white,
+                              fontSize: MediaQuery.of(context).size.width / 80,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                    SizedBox(width: MediaQuery.of(context).size.width / 30),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width / 8,
-                      height: MediaQuery.of(context).size.width / 25,
-                      child: AnimatedTextField(
-                        controller: barangayController,
-                        label: 'Barangay',
-                        suffix: null,
-                        readOnly: false,
+                    ).showCursorOnHover,
+                    SizedBox(width: MediaQuery.of(context).size.width / 80),
+                    GestureDetector(
+                      onTap: () => saveAddress(addressId: addressId),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(
+                            MediaQuery.of(context).size.width / 100,
+                          ),
+                          color: Colors.green,
+                        ),
+                        height: MediaQuery.of(context).size.width / 40,
+                        width: MediaQuery.of(context).size.width / 7.5,
+                        child: Center(
+                          child: Text(
+                            'Save',
+                            style: GoogleFonts.roboto(
+                              color: Colors.white,
+                              fontSize: MediaQuery.of(context).size.width / 80,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: MediaQuery.of(context).size.width / 90),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width / 8,
-                      height: MediaQuery.of(context).size.width / 25,
-                      child: AnimatedTextField(
-                        controller: cityMunicipalityController,
-                        label: 'City/Municipality',
-                        suffix: null,
-                        readOnly: false,
-                      ),
-                    ),
-                    SizedBox(width: MediaQuery.of(context).size.width / 30),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width / 8,
-                      height: MediaQuery.of(context).size.width / 25,
-                      child: AnimatedTextField(
-                        controller: provinceController,
-                        label: 'Province',
-                        suffix: null,
-                        readOnly: false,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: MediaQuery.of(context).size.width / 90),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width / 8,
-                      height: MediaQuery.of(context).size.width / 25,
-                      child: AnimatedTextField(
-                        controller: postalCodeController,
-                        label: 'Postal Code',
-                        suffix: null,
-                        readOnly: false,
-                      ),
-                    ),
-                    SizedBox(width: MediaQuery.of(context).size.width / 30),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width / 8,
-                      height: MediaQuery.of(context).size.width / 25,
-                      child: AnimatedTextField(
-                        controller: countryController,
-                        label: 'Country',
-                        suffix: null,
-                        readOnly: false,
-                      ),
-                    ),
+                    ).showCursorOnHover,
                   ],
                 ),
               ],
-            ),
-          ),
-          actions: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                GestureDetector(
-                  onTap: () => Get.back(),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(
-                        MediaQuery.of(context).size.width / 100,
-                      ),
-                      color: Colors.red,
-                    ),
-                    height: MediaQuery.of(context).size.width / 40,
-                    width: MediaQuery.of(context).size.width / 7.5,
-                    child: Center(
-                      child: Text(
-                        'Cancel',
-                        style: GoogleFonts.roboto(
-                          color: Colors.white,
-                          fontSize: MediaQuery.of(context).size.width / 80,
-                        ),
-                      ),
-                    ),
-                  ),
-                ).showCursorOnHover,
-                SizedBox(width: MediaQuery.of(context).size.width / 80),
-                GestureDetector(
-                  onTap: () => saveAddress(addressId: addressId),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(
-                        MediaQuery.of(context).size.width / 100,
-                      ),
-                      color: Colors.green,
-                    ),
-                    height: MediaQuery.of(context).size.width / 40,
-                    width: MediaQuery.of(context).size.width / 7.5,
-                    child: Center(
-                      child: Text(
-                        'Save',
-                        style: GoogleFonts.roboto(
-                          color: Colors.white,
-                          fontSize: MediaQuery.of(context).size.width / 80,
-                        ),
-                      ),
-                    ),
-                  ),
-                ).showCursorOnHover,
-              ],
-            ),
-          ],
+            );
+          },
         );
       },
     );

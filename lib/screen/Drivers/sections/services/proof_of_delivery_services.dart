@@ -195,4 +195,221 @@ class ProofOfDeliveryService {
       );
     }
   }
+
+  Future<void> markDeliveryFailed(BuildContext context, String orderId) async {
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  final driverId = FirebaseAuth.instance.currentUser?.uid ?? "unknown_driver";
+
+  String? selectedReason;
+  final TextEditingController otherReasonController = TextEditingController();
+
+  final List<String> reasons = [
+    "Customer not answering phone calls",
+    "Customer not at the delivery address",
+    "No one available to receive the parcel",
+    "Customer requested to reschedule delivery",
+    "Delivery address is incomplete or incorrect",
+    "Bad weather or inaccessible location",
+    "Other",
+  ];
+
+  // 🪟 Show dialog (responsive)
+  await showDialog(
+    context: context,
+    builder: (context) {
+      final isMobile = MediaQuery.of(context).size.width < 600;
+      final dialogWidth =
+          isMobile ? MediaQuery.of(context).size.width * 0.9 : 400.0;
+
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: const Text(
+              "Failed to Deliver",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            content: SizedBox(
+              width: dialogWidth,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DropdownButtonFormField<String>(
+                      value: selectedReason,
+                      hint: const Text("Select reason"),
+                      isExpanded: true,
+                      items: reasons.map((r) {
+                        return DropdownMenuItem(value: r, child: Text(r));
+                      }).toList(),
+                      onChanged: (v) {
+                        setState(() => selectedReason = v);
+                      },
+                      decoration: InputDecoration(
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    if (selectedReason == "Other")
+                      TextField(
+                        controller: otherReasonController,
+                        decoration: InputDecoration(
+                          labelText: "Enter other reason",
+                          hintText: "Please describe the issue",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          contentPadding: const EdgeInsets.all(12),
+                        ),
+                        maxLines: 3,
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            actionsAlignment: MainAxisAlignment.spaceBetween,
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  "Cancel",
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.redAccent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: () async {
+                  if (selectedReason == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Please select a reason.")),
+                    );
+                    return;
+                  }
+
+                  if (selectedReason == "Other" &&
+                      otherReasonController.text.trim().isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text("Please enter your reason for 'Other'.")),
+                    );
+                    return;
+                  }
+
+                  final reason = selectedReason == "Other"
+                      ? otherReasonController.text.trim()
+                      : selectedReason!;
+
+                  Navigator.pop(context);
+                  await _recordDeliveryAttempt(context, orderId, reason, driverId);
+                },
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+                  child: Text("Submit", style: TextStyle(color: Colors.white)),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
+
+Future<void> _recordDeliveryAttempt(
+    BuildContext context, String orderId, String reason, String driverId) async {
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  final orderRef = firestore.collection('orders').doc(orderId);
+  final driverParcelRef =
+      firestore.collection('assigned_driver_parcel').doc(driverId);
+
+  try {
+    final snapshot = await orderRef.get();
+    if (!snapshot.exists) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Order not found.")),
+      );
+      return;
+    }
+
+    final data = snapshot.data()!;
+    int attempts = (data['deliveryAttempts'] ?? 0) + 1;
+
+    // 📝 Save attempt in subcollection
+    await orderRef.collection('delivery_attempts').add({
+      'attemptNumber': attempts,
+      'reason': reason,
+      'driverId': driverId,
+      'status': 'Failed',
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+
+    if (attempts >= 3) {
+      // 🚫 3rd failed attempt — mark as Cancelled
+      await orderRef.update({
+        'status': 'Cancelled',
+        'deliveryAttempts': attempts,
+        'cancelledReason': '3 failed delivery attempts',
+        'cancelledAt': FieldValue.serverTimestamp(),
+      });
+
+      // 🧹 Remove this order from assigned_driver_parcel
+      final driverDoc = await driverParcelRef.get();
+      if (driverDoc.exists) {
+        final data = driverDoc.data() as Map<String, dynamic>;
+        final orders = (data['orders'] ?? {}) as Map<String, dynamic>;
+
+        if (orders.containsKey(orderId)) {
+          orders.remove(orderId); // Remove this order
+
+          // If no more orders, delete the whole document
+          if (orders.isEmpty) {
+            await driverParcelRef.delete();
+          } else {
+            await driverParcelRef.update({'orders': orders});
+          }
+        }
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "3rd failed attempt — order cancelled and removed from driver parcel.",
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } else {
+      // 🟠 For 1st or 2nd attempt
+      await orderRef.update({
+        'status': "Attempt $attempts Failed",
+        'deliveryAttempts': attempts,
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Attempt $attempts recorded: $reason"),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    }
+  } catch (e) {
+    debugPrint("Error saving delivery attempt: $e");
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Error: $e"),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
+
 }
