@@ -32,6 +32,7 @@ dependencies:
   get_storage: ^2.1.1
   lottie: ^3.3.0
   uuid: ^4.5.1
+  fl_chart: ^1.1.1
 
 dev_dependencies:
   flutter_test:

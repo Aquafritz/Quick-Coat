@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:quickcoat/screen/Admin/pages/DeletedUsers.dart';
+import 'package:quickcoat/screen/Admin/pages/ManageUsers.dart';
 import 'package:quickcoat/screen/Admin/pages/delivery_driver/driver_assignment.dart';
 import 'package:quickcoat/screen/Admin/pages/delivery_driver/driver_informations.dart';
 import 'package:quickcoat/screen/Admin/pages/delivery_driver/driver_list.dart';
@@ -53,13 +55,14 @@ class AdminLayout extends StatelessWidget {
         page = ReturnandRefundOrders();
         break;
       case AppRoutes.viewOrders:
-  final args = Get.arguments as Map<String, dynamic>;
-  page = ViewOrders(
-    orderData: args["orderData"],
-    orderId: args["orderId"],
-    orderType: args["orderType"] ?? "General", // optional: default fallback
-  );
-      break;
+        final args = Get.arguments as Map<String, dynamic>;
+        page = ViewOrders(
+          orderData: args["orderData"],
+          orderId: args["orderId"],
+          orderType:
+              args["orderType"] ?? "General", // optional: default fallback
+        );
+        break;
       case AppRoutes.driverList:
         page = DriverList();
         break;
@@ -74,6 +77,12 @@ class AdminLayout extends StatelessWidget {
         break;
       case AppRoutes.adminSettings:
         page = SettingsPage();
+        break;
+      case AppRoutes.manageUsers:
+        page = ManageUsers();
+        break;
+      case AppRoutes.deletedUsers:
+        page = DeletedUsers();
         break;
       case AppRoutes.adminDashboard:
       default:

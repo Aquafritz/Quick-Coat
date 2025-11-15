@@ -14,6 +14,7 @@ class Sidebar extends StatefulWidget {
 class _SidebarState extends State<Sidebar> {
   static bool isOrdersExpanded = false;
   static bool isDeliveryExpanded = false;
+  static bool isSettingsExpanded = false;
 
   Future<void> _signOut() async {
     try {
@@ -52,13 +53,25 @@ class _SidebarState extends State<Sidebar> {
                       const SizedBox(height: 25),
 
                       // ✅ Menu items
-                      menuItem(Icons.dashboard, 'Dashboard', AppRoutes.adminDashboard),
-                      menuItem(Icons.inventory, 'Products', AppRoutes.adminProducts),
+                      menuItem(
+                        Icons.dashboard,
+                        'Dashboard',
+                        AppRoutes.adminDashboard,
+                      ),
+                      menuItem(
+                        Icons.inventory,
+                        'Products',
+                        AppRoutes.adminProducts,
+                      ),
 
                       _buildOrdersSection(),
                       _buildDeliveryDrivers(),
-                      menuItem(Icons.bar_chart, 'Analytics', AppRoutes.adminAnalytics),
-                      menuItem(Icons.settings, 'Settings', AppRoutes.adminSettings),
+                      menuItem(
+                        Icons.bar_chart,
+                        'Analytics',
+                        AppRoutes.adminAnalytics,
+                      ),
+                      _buildSettings(),
                     ],
                   ),
                 ),
@@ -67,7 +80,11 @@ class _SidebarState extends State<Sidebar> {
               /// Fixed Bottom Section
               const Divider(color: Colors.white30, thickness: 0.5),
               ListTile(
-                leading: const Icon(Icons.logout, color: Colors.redAccent, size: 20),
+                leading: const Icon(
+                  Icons.logout,
+                  color: Colors.redAccent,
+                  size: 20,
+                ),
                 title: const Text(
                   "Sign Out",
                   style: TextStyle(color: Colors.redAccent, fontSize: 13),
@@ -107,10 +124,7 @@ class _SidebarState extends State<Sidebar> {
               const SizedBox(height: 4),
               const Text(
                 "Admin Panel",
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 10,
-                ),
+                style: TextStyle(color: Colors.white70, fontSize: 10),
               ),
             ],
           ),
@@ -128,10 +142,7 @@ class _SidebarState extends State<Sidebar> {
               ),
               Text(
                 "Quality Kapote for Everyone",
-                style: TextStyle(
-                  color: Colors.white54,
-                  fontSize: 10,
-                ),
+                style: TextStyle(color: Colors.white54, fontSize: 10),
               ),
             ],
           ),
@@ -169,7 +180,10 @@ class _SidebarState extends State<Sidebar> {
               subMenuItem("Shipped Orders", AppRoutes.shippedOrders),
               subMenuItem("Delivered Orders", AppRoutes.deliveredOrders),
               subMenuItem("Cancelled Orders", AppRoutes.cancelledOrders),
-              subMenuItem("Return & Refund Orders", AppRoutes.returnandrefundOrders),
+              subMenuItem(
+                "Return & Refund Orders",
+                AppRoutes.returnandrefundOrders,
+              ),
             ],
           ),
         ],
@@ -180,7 +194,10 @@ class _SidebarState extends State<Sidebar> {
   Widget menuItem(IconData icon, String title, String route) {
     return ListTile(
       leading: Icon(icon, color: Colors.white, size: 20),
-      title: Text(title, style: const TextStyle(color: Colors.white, fontSize: 13)),
+      title: Text(
+        title,
+        style: const TextStyle(color: Colors.white, fontSize: 13),
+      ),
       onTap: () {
         setState(() => isOrdersExpanded = false);
         Get.offNamed(route);
@@ -193,7 +210,10 @@ class _SidebarState extends State<Sidebar> {
   Widget subMenuItem(String title, String route) {
     return ListTile(
       leading: const Icon(Icons.arrow_right, color: Colors.white54, size: 18),
-      title: Text(title, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+      title: Text(
+        title,
+        style: const TextStyle(color: Colors.white70, fontSize: 12),
+      ),
       onTap: () {
         setState(() => isOrdersExpanded = true);
         Get.toNamed(route);
@@ -203,7 +223,55 @@ class _SidebarState extends State<Sidebar> {
     );
   }
 
-   Widget _buildDeliveryDrivers() {
+  Widget _buildSettings() {
+    return Theme(
+      data: Theme.of(context).copyWith(
+        dividerColor: Colors.transparent,
+        unselectedWidgetColor: Colors.white70,
+        colorScheme: const ColorScheme.dark(),
+      ),
+      child: ExpansionTile(
+        initiallyExpanded: isSettingsExpanded,
+        onExpansionChanged: (expanded) {
+          setState(() => isSettingsExpanded = expanded);
+        },
+        leading: const Icon(Icons.settings, color: Colors.white, size: 20),
+        title: const Text(
+          "Settings",
+          style: TextStyle(color: Colors.white, fontSize: 13),
+        ),
+        childrenPadding: const EdgeInsets.only(left: 20),
+        iconColor: Colors.white,
+        collapsedIconColor: Colors.white70,
+        children: [
+          Column(
+            children: [
+              settingsSubMenu("Active Customers", AppRoutes.manageUsers),
+              settingsSubMenu("Inactive Customers", AppRoutes.deletedUsers),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget settingsSubMenu(String title, String route) {
+    return ListTile(
+      leading: const Icon(Icons.arrow_right, color: Colors.white54, size: 18),
+      title: Text(
+        title,
+        style: const TextStyle(color: Colors.white70, fontSize: 12),
+      ),
+      onTap: () {
+        setState(() => isSettingsExpanded = true);
+        Get.toNamed(route);
+      },
+      dense: true,
+      visualDensity: VisualDensity.compact,
+    );
+  }
+
+  Widget _buildDeliveryDrivers() {
     return Theme(
       data: Theme.of(context).copyWith(
         dividerColor: Colors.transparent,
@@ -215,7 +283,11 @@ class _SidebarState extends State<Sidebar> {
         onExpansionChanged: (expanded) {
           setState(() => isDeliveryExpanded = expanded);
         },
-        leading: const Icon(Icons.local_shipping_rounded, color: Colors.white, size: 20),
+        leading: const Icon(
+          Icons.local_shipping_rounded,
+          color: Colors.white,
+          size: 20,
+        ),
         title: const Text(
           "Delivery Driver",
           style: TextStyle(color: Colors.white, fontSize: 13),
@@ -227,7 +299,10 @@ class _SidebarState extends State<Sidebar> {
           Column(
             children: [
               deliverysubMenuItem("Driver List", AppRoutes.driverList),
-              deliverysubMenuItem("Driver Assignment", AppRoutes.driverAssignment),
+              deliverysubMenuItem(
+                "Driver Assignment",
+                AppRoutes.driverAssignment,
+              ),
             ],
           ),
         ],
@@ -238,7 +313,10 @@ class _SidebarState extends State<Sidebar> {
   Widget deliverysubMenuItem(String title, String route) {
     return ListTile(
       leading: const Icon(Icons.arrow_right, color: Colors.white54, size: 18),
-      title: Text(title, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+      title: Text(
+        title,
+        style: const TextStyle(color: Colors.white70, fontSize: 12),
+      ),
       onTap: () {
         setState(() => isDeliveryExpanded = true);
         Get.toNamed(route);

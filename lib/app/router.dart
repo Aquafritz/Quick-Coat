@@ -34,7 +34,7 @@ class AppRoutes {
   // Admin Layout
   static const String adminDashboard = '/adminDashboard';
   static const String adminProducts = '/adminProducts';
-  
+
   static const String allOrders = '/allOrders';
   static const String pendingOrders = '/pendingOrders';
   static const String processingOrders = '/processingOrders';
@@ -42,13 +42,16 @@ class AppRoutes {
   static const String deliveredOrders = '/deliveredOrders';
   static const String cancelledOrders = '/cancelledOrders';
   static const String returnandrefundOrders = '/returnandrefundOrders';
-  static const String viewOrders= '/viewOrders';
+  static const String viewOrders = '/viewOrders';
 
   static const String driverList = '/driverList';
-  static const String driverAssignment= '/driverAssignment';
+  static const String driverAssignment = '/driverAssignment';
 
   static const String adminAnalytics = '/adminAnalytics';
   static const String adminSettings = '/adminSettings';
+
+  static const String manageUsers = '/manageUsers';
+  static const String deletedUsers = '/deletedUsers';
 
   // Customer
   static const String costumerHome = '/costumerHome';
@@ -69,7 +72,7 @@ class AppRoutes {
   static const String shoppingCart = '/shoppingCart';
   static const String addProduct = '/addProduct';
 
-    // Others
+  // Others
   static const String contact = '/contact';
   static const String termsandcondition = '/terms&condition';
   static const String aboutus = '/aboutUs';
@@ -101,7 +104,10 @@ class AppRoutes {
     GetPage(name: driverHome, page: () => DriverLayout()),
     GetPage(name: driverDeliveryHistory, page: () => DriverDeliveryHistory()),
     GetPage(name: driverProfileSettings, page: () => DriverProfileSettings()),
-    GetPage(name: driverVehicleInformation, page: () => DriverVehicleInformation()),
+    GetPage(
+      name: driverVehicleInformation,
+      page: () => DriverVehicleInformation(),
+    ),
     GetPage(name: driverSignIn, page: () => RiderLogin()),
     GetPage(name: driverInformation, page: () => AdminLayout()),
 
@@ -124,8 +130,11 @@ class AppRoutes {
     GetPage(name: productDetails, page: () => ProductsDetails()),
     GetPage(name: shoppingCart, page: () => ShoppingCart()),
     GetPage(name: addProduct, page: () => AddProduct()),
-    
+
     GetPage(name: driverList, page: () => AdminLayout()),
-    GetPage(name: driverAssignment, page: () => AdminLayout())
+    GetPage(name: driverAssignment, page: () => AdminLayout()),
+
+    GetPage(name: manageUsers, page: () => AdminLayout()),
+    GetPage(name: deletedUsers, page: () => AdminLayout()),
   ];
 }
