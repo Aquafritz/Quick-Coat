@@ -94,9 +94,19 @@ class _CostumerSettingState extends State<CostumerSetting> {
       genderController.text = data['gender'] ?? '';
       profilePictureUrl = data['profile_picture'];
 
-      if (data['date_of_birth'] != null && data['date_of_birth'] is Timestamp) {
-        dobTimestamp = data['date_of_birth'];
-      }
+      if (data['date_of_birth'] != null) {
+  if (data['date_of_birth'] is Timestamp) {
+    dobTimestamp = data['date_of_birth'];
+  } else if (data['date_of_birth'] is String) {
+    try {
+      final parsed = DateFormat("MM/dd/yyyy").parse(data['date_of_birth']);
+      dobTimestamp = Timestamp.fromDate(parsed);
+    } catch (e) {
+      print("DOB format error: $e");
+    }
+  }
+}
+
       setState(() {});
     }
   }
@@ -393,13 +403,11 @@ class _CostumerSettingState extends State<CostumerSetting> {
                   child: AbsorbPointer(
                     child: AnimatedTextField(
                       controller: TextEditingController(
-                        text:
-                            dobTimestamp != null
-                                ? DateFormat(
-                                  'MM/dd/yyyy',
-                                ).format(dobTimestamp!.toDate())
-                                : '',
-                      ),
+  text: dobTimestamp == null
+      ? ''
+      : DateFormat('MM/dd/yyyy').format(dobTimestamp!.toDate()),
+)..selection = TextSelection.collapsed(offset: 0),
+
                       label: 'Date of Birth',
                       suffix: Icon(Icons.calendar_today),
                       readOnly: true,

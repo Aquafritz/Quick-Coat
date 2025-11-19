@@ -19,7 +19,7 @@ class _SecondSectionState extends State<SecondSection> {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [AppColors.color10, AppColors.color5, Colors.white],
+          colors: [ Colors.white, AppColors.color5, AppColors.color10,],
           stops: const [0.0, 0.5, 1.0],
         ),
       ),
@@ -35,7 +35,7 @@ class _SecondSectionState extends State<SecondSection> {
               child: Text(
                 "What Our Customers Say",
                 style: TextStyle(
-                  color: AppColors.color1,
+                  color: AppColors.color11,
                   fontSize: MediaQuery.of(context).size.width / 25,
                   fontFamily:
                       GoogleFonts.inter(fontWeight: FontWeight.bold).fontFamily,

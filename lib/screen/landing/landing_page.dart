@@ -29,7 +29,7 @@ class _LandingPageState extends State<LandingPage> {
                 child: Column(
                   children: [
                     FirstSection(),
-                    // VideoSection(),
+                    VideoSection(),
                     SecondSection(),
                     ThirdSection(),
                     Footer(),

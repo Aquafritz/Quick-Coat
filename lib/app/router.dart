@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:quickcoat/screen/Admin/pages/delivery_driver/driver_informations.dart';
 import 'package:quickcoat/screen/Admin/pages/product_sectors/product_utils_services/add_product.dart';
+import 'package:quickcoat/screen/Admin/pages/red_flag/red_flag.dart';
 import 'package:quickcoat/screen/Costumer/sections/costumer_setting.dart';
 import 'package:quickcoat/screen/Costumer/sections/check_out.dart';
 import 'package:quickcoat/screen/Costumer/sections/my_purchase.dart';
@@ -79,6 +80,9 @@ class AppRoutes {
   static const String privacypolicy = '/privacyPolicy';
   static const String successpayment = '/successPayment';
 
+  // RedFlags
+  static const String redflag = '/redflags';
+
   static final routes = [
     GetPage(name: landpage, page: () => LandingPage()),
 
@@ -136,5 +140,8 @@ class AppRoutes {
 
     GetPage(name: manageUsers, page: () => AdminLayout()),
     GetPage(name: deletedUsers, page: () => AdminLayout()),
+
+    // Red Flag 
+    GetPage(name: redflag, page: () => AdminLayout()),
   ];
 }

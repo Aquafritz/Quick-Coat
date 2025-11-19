@@ -22,17 +22,19 @@ class _VideoSectionState extends State<VideoSection> {
   }
 
   Future<void> _initializePlayer() async {
-    _videoPlayerController =
-        VideoPlayerController.asset('assets/videos/video.mp4');
-
+    _videoPlayerController = VideoPlayerController.asset('assets/videos/video.mp4');
     await _videoPlayerController.initialize();
 
     _chewieController = ChewieController(
       videoPlayerController: _videoPlayerController,
-      autoPlay: true,
+      autoPlay: false,
       looping: true,
-      showControls: false, // hide all controls
+      showControls: false,
     );
+
+    _videoPlayerController.addListener(() {
+      if (mounted) setState(() {});
+    });
 
     setState(() {
       _isLoading = false;
@@ -40,14 +42,12 @@ class _VideoSectionState extends State<VideoSection> {
   }
 
   void _togglePlayPause() {
-  if (_chewieController.isPlaying) {
-    _chewieController.pause(); // this pauses both video and audio
-  } else {
-    _chewieController.play();
+    if (_videoPlayerController.value.isPlaying) {
+      _videoPlayerController.pause();
+    } else {
+      _videoPlayerController.play();
+    }
   }
-  setState(() {}); // update UI for play icon
-}
-
 
   @override
   void dispose() {
@@ -58,6 +58,8 @@ class _VideoSectionState extends State<VideoSection> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -65,25 +67,27 @@ class _VideoSectionState extends State<VideoSection> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            AppColors.color10.withOpacity(0.15),
             AppColors.color10,
+            AppColors.color5,
+            Colors.white,
           ],
+          stops: const [0.0, 0.5, 1.0],
         ),
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(
-          vertical: MediaQuery.of(context).size.width / 15,
-          horizontal: MediaQuery.of(context).size.width / 8.5,
+          vertical: size.width / 15,
+          horizontal: size.width / 8.5,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Top Text
+            // Title
             Text(
               "Watch Our Product in Action",
               style: TextStyle(
                 color: Colors.white,
-                fontSize: MediaQuery.of(context).size.width / 20,
+                fontSize: size.width / 20,
                 fontWeight: FontWeight.bold,
               ),
               textAlign: TextAlign.center,
@@ -93,45 +97,68 @@ class _VideoSectionState extends State<VideoSection> {
               "Experience premium quality coats through this video demonstration.",
               style: TextStyle(
                 color: Colors.white70,
-                fontSize: MediaQuery.of(context).size.width / 40,
+                fontSize: size.width / 40,
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: MediaQuery.of(context).size.width / 20),
+            SizedBox(height: size.width / 20),
 
-            // Video with tap-to-play/pause overlay
+            // === VIDEO SECTION ===
             _isLoading
                 ? const CircularProgressIndicator(color: Colors.white)
-                : Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: SizedBox(
-                          width: double.infinity,
-                          height: MediaQuery.of(context).size.height / 2,
-                          child: Chewie(controller: _chewieController),
+                : Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // ✨ Video with gradient fade matching background
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: ShaderMask(
+                            shaderCallback: (Rect bounds) {
+                              return LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  AppColors.color10.withOpacity(0.3),
+                                  AppColors.color5.withOpacity(0.6),
+                                  Colors.white.withOpacity(0.8),
+                                ],
+                                stops: const [0.0, 0.5, 1.0],
+                              ).createShader(bounds);
+                            },
+                            blendMode: BlendMode.softLight,
+                            child: AspectRatio(
+                              aspectRatio: _videoPlayerController.value.aspectRatio != 0
+                                  ? _videoPlayerController.value.aspectRatio
+                                  : 16 / 9,
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: Chewie(controller: _chewieController),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                      // Tap detector on top
-                      Positioned.fill(
-                        child: GestureDetector(
-  onTap: _togglePlayPause,
-  child: Container(
-    color: Colors.transparent,
-    alignment: Alignment.center,
-    child: !_chewieController.isPlaying
-        ? Icon(
-            Icons.play_arrow,
-            color: Colors.white.withOpacity(0.8),
-            size: 80,
-          )
-        : null,
-  ),
-)
 
-                      ),
-                    ],
+                        // Tap-to-play overlay
+                        Positioned.fill(
+                          child: GestureDetector(
+                            onTap: _togglePlayPause,
+                            child: Container(
+                              color: Colors.transparent,
+                              alignment: Alignment.center,
+                              child: !_videoPlayerController.value.isPlaying
+                                  ? Icon(
+                                      Icons.play_arrow,
+                                      color: Colors.white.withOpacity(0.8),
+                                      size: 80,
+                                    )
+                                  : null,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
           ],
         ),

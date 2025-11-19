@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
+import 'package:quickcoat/services/verification_services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -197,153 +198,126 @@ class ProofOfDeliveryService {
   }
 
   Future<void> markDeliveryFailed(BuildContext context, String orderId) async {
-  final FirebaseFirestore firestore = FirebaseFirestore.instance;
-  final driverId = FirebaseAuth.instance.currentUser?.uid ?? "unknown_driver";
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    final driverId = FirebaseAuth.instance.currentUser?.uid ?? "unknown_driver";
 
-  String? selectedReason;
-  final TextEditingController otherReasonController = TextEditingController();
+    String? selectedReason;
+    final TextEditingController otherReasonController = TextEditingController();
 
-  final List<String> reasons = [
-    "Customer not answering phone calls",
-    "Customer not at the delivery address",
-    "No one available to receive the parcel",
-    "Customer requested to reschedule delivery",
-    "Delivery address is incomplete or incorrect",
-    "Bad weather or inaccessible location",
-    "Other",
-  ];
+    final List<String> reasons = [
+      "Customer not answering phone calls",
+      "Customer not at the delivery address",
+      "No one available to receive the parcel",
+      "Customer requested to reschedule delivery",
+      "Other",
+    ];
 
-  // 🪟 Show dialog (responsive)
-  await showDialog(
-    context: context,
-    builder: (context) {
-      final isMobile = MediaQuery.of(context).size.width < 600;
-      final dialogWidth =
-          isMobile ? MediaQuery.of(context).size.width * 0.9 : 400.0;
+    await showDialog(
+      context: context,
+      builder: (context) {
+        final isMobile = MediaQuery.of(context).size.width < 600;
+        final dialogWidth = isMobile ? MediaQuery.of(context).size.width * 0.9 : 400.0;
 
-      return StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            title: const Text(
-              "Failed to Deliver",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            content: SizedBox(
-              width: dialogWidth,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    DropdownButtonFormField<String>(
-                      value: selectedReason,
-                      hint: const Text("Select reason"),
-                      isExpanded: true,
-                      items: reasons.map((r) {
-                        return DropdownMenuItem(value: r, child: Text(r));
-                      }).toList(),
-                      onChanged: (v) {
-                        setState(() => selectedReason = v);
-                      },
-                      decoration: InputDecoration(
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text("Failed to Deliver", style: TextStyle(fontWeight: FontWeight.bold)),
+              content: SizedBox(
+                width: dialogWidth,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      DropdownButtonFormField<String>(
+                        value: selectedReason,
+                        hint: const Text("Select reason"),
+                        isExpanded: true,
+                        items: reasons.map((r) {
+                          return DropdownMenuItem(value: r, child: Text(r));
+                        }).toList(),
+                        onChanged: (v) => setState(() => selectedReason = v),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    if (selectedReason == "Other")
-                      TextField(
-                        controller: otherReasonController,
-                        decoration: InputDecoration(
-                          labelText: "Enter other reason",
-                          hintText: "Please describe the issue",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
+                      const SizedBox(height: 12),
+                      if (selectedReason == "Other")
+                        TextField(
+                          controller: otherReasonController,
+                          decoration: const InputDecoration(
+                            labelText: "Enter other reason",
+                            hintText: "Please describe the issue",
+                            border: OutlineInputBorder(),
                           ),
-                          contentPadding: const EdgeInsets.all(12),
+                          maxLines: 3,
                         ),
-                        maxLines: 3,
-                      ),
-                  ],
-                ),
-              ),
-            ),
-            actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            actionsAlignment: MainAxisAlignment.spaceBetween,
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text(
-                  "Cancel",
-                  style: TextStyle(color: Colors.grey),
-                ),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    ],
                   ),
                 ),
-                onPressed: () async {
-                  if (selectedReason == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Please select a reason.")),
-                    );
-                    return;
-                  }
-
-                  if (selectedReason == "Other" &&
-                      otherReasonController.text.trim().isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text("Please enter your reason for 'Other'.")),
-                    );
-                    return;
-                  }
-
-                  final reason = selectedReason == "Other"
-                      ? otherReasonController.text.trim()
-                      : selectedReason!;
-
-                  Navigator.pop(context);
-                  await _recordDeliveryAttempt(context, orderId, reason, driverId);
-                },
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-                  child: Text("Submit", style: TextStyle(color: Colors.white)),
-                ),
               ),
-            ],
-          );
-        },
-      );
-    },
-  );
-}
+              actions: [
+                TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+                  onPressed: () async {
+                    if (selectedReason == null) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Please select a reason.")),
+                        );
+                      }
+                      return;
+                    }
+                    if (selectedReason == "Other" && otherReasonController.text.trim().isEmpty) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Please enter a reason for 'Other'.")),
+                        );
+                      }
+                      return;
+                    }
+
+                    final reason = selectedReason == "Other"
+                        ? otherReasonController.text.trim()
+                        : selectedReason!;
+                    Navigator.pop(context);
+                    await _recordDeliveryAttempt(context, orderId, reason, driverId);
+                  },
+                  child: const Text("Submit"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
 
 Future<void> _recordDeliveryAttempt(
-    BuildContext context, String orderId, String reason, String driverId) async {
-  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  BuildContext context,
+  String orderId,
+  String reason,
+  String driverId,
+) async {
+  final firestore = FirebaseFirestore.instance;
   final orderRef = firestore.collection('orders').doc(orderId);
   final driverParcelRef =
       firestore.collection('assigned_driver_parcel').doc(driverId);
+  final verificationService = VerificationService();
 
   try {
     final snapshot = await orderRef.get();
     if (!snapshot.exists) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Order not found.")),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Order not found.")),
+        );
+      }
       return;
     }
 
     final data = snapshot.data()!;
     int attempts = (data['deliveryAttempts'] ?? 0) + 1;
+    final customerId = data['userId'];
 
-    // 📝 Save attempt in subcollection
+    // ✅ Record this failed attempt in subcollection
     await orderRef.collection('delivery_attempts').add({
       'attemptNumber': attempts,
       'reason': reason,
@@ -353,7 +327,7 @@ Future<void> _recordDeliveryAttempt(
     });
 
     if (attempts >= 3) {
-      // 🚫 3rd failed attempt — mark as Cancelled
+      // 🔹 Mark order as cancelled
       await orderRef.update({
         'status': 'Cancelled',
         'deliveryAttempts': attempts,
@@ -361,16 +335,13 @@ Future<void> _recordDeliveryAttempt(
         'cancelledAt': FieldValue.serverTimestamp(),
       });
 
-      // 🧹 Remove this order from assigned_driver_parcel
+      // 🔹 Remove order from assigned_driver_parcel
       final driverDoc = await driverParcelRef.get();
       if (driverDoc.exists) {
         final data = driverDoc.data() as Map<String, dynamic>;
         final orders = (data['orders'] ?? {}) as Map<String, dynamic>;
-
         if (orders.containsKey(orderId)) {
-          orders.remove(orderId); // Remove this order
-
-          // If no more orders, delete the whole document
+          orders.remove(orderId);
           if (orders.isEmpty) {
             await driverParcelRef.delete();
           } else {
@@ -379,37 +350,71 @@ Future<void> _recordDeliveryAttempt(
         }
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "3rd failed attempt — order cancelled and removed from driver parcel.",
+      // 🔍 Fetch all delivery attempt reasons
+      final attemptsSnapshot = await orderRef
+          .collection('delivery_attempts')
+          .orderBy('timestamp', descending: false)
+          .get();
+
+      String mainReason = "Multiple failed reasons";
+      if (attemptsSnapshot.docs.isNotEmpty) {
+        final allReasons = attemptsSnapshot.docs
+            .map((doc) => (doc.data()['reason'] ?? '').toString().trim())
+            .where((r) => r.isNotEmpty)
+            .toList();
+
+        // 🧠 If all attempts have the same reason, use it
+        if (allReasons.toSet().length == 1) {
+          mainReason = allReasons.first;
+        }
+      }
+
+      // 🚨 Add red flag using the main reason
+      if (customerId != null && customerId.toString().isNotEmpty) {
+        await verificationService.addRedFlag(
+          userId: customerId,
+          reason: mainReason == "Multiple failed reasons"
+              ? "Delivery failed 3 times — Multiple failed reasons"
+              : "Delivery failed 3 times — Reason: $mainReason",
+          reportedBy: driverId,
+        );
+      }
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "3rd failed attempt — order cancelled. ${mainReason == "Multiple failed reasons" ? "Different issues occurred." : "Reason: $mainReason"}",
+            ),
+            backgroundColor: Colors.red,
           ),
-          backgroundColor: Colors.red,
-        ),
-      );
+        );
+      }
     } else {
-      // 🟠 For 1st or 2nd attempt
+      // 🔸 For 1st or 2nd attempt — record only, no status change
       await orderRef.update({
-        'status': "Attempt $attempts Failed",
         'deliveryAttempts': attempts,
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Attempt $attempts recorded: $reason"),
-          backgroundColor: Colors.orange,
-        ),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Attempt $attempts recorded: $reason"),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
     }
   } catch (e) {
     debugPrint("Error saving delivery attempt: $e");
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Error: $e"),
-        backgroundColor: Colors.red,
-      ),
-    );
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Error: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 }
-
 }

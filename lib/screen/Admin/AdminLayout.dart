@@ -12,6 +12,7 @@ import 'package:quickcoat/screen/Admin/pages/orders/processing_orders.dart';
 import 'package:quickcoat/screen/Admin/pages/orders/returnandrefund_orders.dart';
 import 'package:quickcoat/screen/Admin/pages/orders/shipped_orders.dart';
 import 'package:quickcoat/screen/Admin/pages/orders/view_orders.dart';
+import 'package:quickcoat/screen/Admin/pages/red_flag/red_flag.dart';
 import 'Sidebar.dart';
 import 'pages/DashboardPage.dart';
 import 'pages/product_sectors/ProductsPage.dart';
@@ -71,6 +72,9 @@ class AdminLayout extends StatelessWidget {
         break;
       case AppRoutes.driverAssignment:
         page = DriverAssignment();
+        break;
+      case AppRoutes.redflag:
+        page = RedFlag();
         break;
       case AppRoutes.adminAnalytics:
         page = AnalyticsPage();

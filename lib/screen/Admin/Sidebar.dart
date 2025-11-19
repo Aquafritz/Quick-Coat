@@ -66,6 +66,12 @@ class _SidebarState extends State<Sidebar> {
 
                       _buildOrdersSection(),
                       _buildDeliveryDrivers(),
+                      
+                      menuItem(
+                        Icons.outlined_flag,
+                        'Red Flags',
+                        AppRoutes.redflag,
+                      ),
                       menuItem(
                         Icons.bar_chart,
                         'Analytics',
@@ -180,10 +186,7 @@ class _SidebarState extends State<Sidebar> {
               subMenuItem("Shipped Orders", AppRoutes.shippedOrders),
               subMenuItem("Delivered Orders", AppRoutes.deliveredOrders),
               subMenuItem("Cancelled Orders", AppRoutes.cancelledOrders),
-              subMenuItem(
-                "Return & Refund Orders",
-                AppRoutes.returnandrefundOrders,
-              ),
+              subMenuItem("Return & Refund Orders", AppRoutes.returnandrefundOrders),
             ],
           ),
         ],

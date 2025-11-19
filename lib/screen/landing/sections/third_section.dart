@@ -21,9 +21,10 @@ class _ThirdSectionState extends State<ThirdSection> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Colors.white, 
+            AppColors.color10, // match second section start
             AppColors.color6, // little color at top
-            AppColors.color11, // match second section start
+            Colors.grey.shade100, 
+            
           ],
           stops: [0.0, 0.4, 0.8],
         ),
@@ -40,7 +41,7 @@ class _ThirdSectionState extends State<ThirdSection> {
               child: Text(
                 "Explore Our Exclusive Collection",
                 style: TextStyle(
-                  color: AppColors.color11,
+                  color: AppColors.color1,
                   fontSize: MediaQuery.of(context).size.width / 25,
                   fontFamily:
                       GoogleFonts.inter(fontWeight: FontWeight.bold).fontFamily,
@@ -55,7 +56,7 @@ class _ThirdSectionState extends State<ThirdSection> {
                 Text(
                   "Featured Products",
                   style: TextStyle(
-                    color: AppColors.color11,
+                    color: AppColors.color1,
                     fontSize: MediaQuery.of(context).size.width / 50,
                     fontFamily:
                         GoogleFonts.inter(
@@ -72,7 +73,7 @@ class _ThirdSectionState extends State<ThirdSection> {
                       Text(
                         "View All",
                         style: TextStyle(
-                          color: AppColors.color11,
+                          color: AppColors.color1,
                           fontSize: MediaQuery.of(context).size.width / 50,
                           fontFamily:
                               GoogleFonts.inter(
@@ -83,7 +84,7 @@ class _ThirdSectionState extends State<ThirdSection> {
                       SizedBox(width: MediaQuery.of(context).size.width / 100),
                       Icon(
                         Icons.arrow_forward_ios,
-                        color: AppColors.color11,
+                        color: AppColors.color1,
                         size: MediaQuery.of(context).size.width / 50,
                       ),
                     ],
@@ -93,6 +94,7 @@ class _ThirdSectionState extends State<ThirdSection> {
             ),
             SizedBox(height: MediaQuery.of(context).size.width / 80),
             ProductListView(),
+            SizedBox(height: MediaQuery.of(context).size.width / 30),
           ],
         ),
       ),
