@@ -81,6 +81,7 @@ class PayMongoService {
 
       final methodData = jsonDecode(methodResponse.body);
       final paymentMethodId = methodData["data"]["id"];
+      final origin = Uri.base.origin; // auto-detects correct port
 
       // 5️⃣ Attach method to intent
       final attachResponse = await http.post(
@@ -89,6 +90,7 @@ class PayMongoService {
         body: jsonEncode({
           "paymentIntentId": paymentIntentId,
           "paymentMethodId": paymentMethodId,
+          "returnUrl": "$origin/#/successPayment",
         }),
       );
 
